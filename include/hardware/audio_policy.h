@@ -240,6 +240,15 @@ struct audio_policy {
 
     /* dump state */
     int (*dump)(const struct audio_policy *pol, int fd);
+
+    /*Check offload support */
+    bool (*is_offload_supported)(struct audio_policy *pol, uint32_t format,
+                                   audio_stream_type_t stream,
+                                   uint32_t samplingRate,
+                                   uint32_t bitRate,
+                                   int64_t duration,
+                                   bool isVideo,
+                                   bool isStreaming);
 };
 
 /* audio hw module handle used by load_hw_module(), open_output_on_module()
