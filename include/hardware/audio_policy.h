@@ -363,6 +363,11 @@ struct audio_policy_service_ops {
                             float volume,
                             int delay_ms);
 
+    /* set fm rx playback audio volume. */
+    int (*set_fm_rx_volume)(void *service,
+                            float volume,
+                            int delay_ms);
+
     /* move effect to the specified output */
     int (*move_effects)(void *service,
                         int session,

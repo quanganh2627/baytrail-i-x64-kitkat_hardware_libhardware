@@ -358,6 +358,9 @@ struct audio_hw_device {
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
     int (*set_voice_volume)(struct audio_hw_device *dev, float volume);
 
+    /** set fm rx playback volume. Range is between 0.0 and 1.0 */
+    int (*set_fm_rx_volume)(struct audio_hw_device *dev, float volume);
+
     /**
      * set the audio volume for all audio activities other than voice call.
      * Range between 0.0 and 1.0. If any value other than 0 is returned,
