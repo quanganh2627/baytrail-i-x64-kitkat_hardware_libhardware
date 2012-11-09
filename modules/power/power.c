@@ -19,23 +19,103 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define LOG_TAG "Legacy PowerHAL"
+#define LOG_TAG "Intel PowerHAL"
 #include <utils/Log.h>
 
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-static void power_init(struct power_module *module)
+#define FAMILY_ID_SYSFS	"/sys/spid/platform_family_id"
+#define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/timer_rate"
+#define UP_THRESHOLD_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load"
+#define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
+
+static int board_id ;
+
+struct intel_power_module{
+	struct power_module container;
+	int touch_event;
+	int vsync_count;
+};
+
+static void sysfs_write(char *path, char *s)
+{
+    char buf[80];
+    int len;
+    int fd = open(path, O_WRONLY);
+
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error opening %s: %s\n", path, buf);
+        return;
+    }
+
+    len = write(fd, s, strlen(s));
+    if (len < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error writing to %s: %s\n", path, buf);
+    }
+
+    close(fd);
+}
+
+static char* sysfs_read(char *path)
+{	int len;
+	char *buf=NULL;
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+		return NULL;
+    }
+	buf = (char*)malloc(10);
+    len = read(fd,buf,sizeof(buf));
+    if (len < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+	}
+	close(fd);
+	return buf;
+
+}
+static void intel_power_init(struct power_module *module)
+{
+	ALOGW("**Intel Power HAL initialisation**\n");
+/*board_id can be used to set different parameters for different platforms*/
+	board_id = atoi(sysfs_read(FAMILY_ID_SYSFS));
+
+/*initialization*/
+	sysfs_write(TIMER_RATE_SYSFS,"100000");
+	sysfs_write(UP_THRESHOLD_SYSFS,"70");
+}
+
+static void intel_power_set_interactive(struct power_module *module, int on)
 {
 }
 
-static void power_set_interactive(struct power_module *module, int on)
-{
-}
-
-static void power_hint(struct power_module *module, power_hint_t hint,
+static void intel_power_hint(struct power_module *module, power_hint_t hint,
                        void *data) {
-    switch (hint) {
+
+	struct intel_power_module *intel_module = (struct intel_power_module*)module;
+	switch (hint) {
+		case POWER_HINT_INTERACTION:
+		if(intel_module->touch_event == 0){
+			intel_module->vsync_count = 4 ;
+			intel_module->touch_event = 1 ;
+			sysfs_write(BOOST_PULSE_SYSFS,"1");
+			sysfs_write(TIMER_RATE_SYSFS,"20000");
+		}
+		break;
+		case POWER_HINT_VSYNC:
+		if((data == 1) && (intel_module->vsync_count > 0)){
+			if(intel_module->vsync_count < 4)
+				sysfs_write(BOOST_PULSE_SYSFS,"1");
+			intel_module->vsync_count-=1;
+		}
+		if((data == 0) && (intel_module->touch_event == 1)){
+			sysfs_write(TIMER_RATE_SYSFS,"100000");
+			sysfs_write(BOOST_PULSE_SYSFS,"1");
+			intel_module->touch_event = 0;
+		}
+        break;
     default:
         break;
     }
@@ -45,18 +125,23 @@ static struct hw_module_methods_t power_module_methods = {
     .open = NULL,
 };
 
-struct power_module HAL_MODULE_INFO_SYM = {
-    .common = {
-        .tag = HARDWARE_MODULE_TAG,
-        .module_api_version = POWER_MODULE_API_VERSION_0_2,
-        .hal_api_version = HARDWARE_HAL_API_VERSION,
-        .id = POWER_HARDWARE_MODULE_ID,
-        .name = "Default Power HAL",
-        .author = "The Android Open Source Project",
-        .methods = &power_module_methods,
-    },
 
-    .init = power_init,
-    .setInteractive = power_set_interactive,
-    .powerHint = power_hint,
+
+struct intel_power_module HAL_MODULE_INFO_SYM = {
+    container:{
+			common: {
+			tag: HARDWARE_MODULE_TAG,
+			module_api_version: POWER_MODULE_API_VERSION_0_2,
+			hal_api_version: HARDWARE_HAL_API_VERSION,
+			id: POWER_HARDWARE_MODULE_ID,
+			name: "Intel Power HAL",
+			author: "Power Management Team",
+			methods: &power_module_methods,
+	},
+    init: intel_power_init,
+    setInteractive: intel_power_set_interactive,
+    powerHint: intel_power_hint,
+    },
+	touch_event: 0,
+	vsync_count: 0,
 };
