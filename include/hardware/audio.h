@@ -107,6 +107,9 @@ __BEGIN_DECLS
 /* Screen state */
 #define AUDIO_PARAMETER_KEY_SCREEN_STATE "screen_state"
 
+/* Stream Flags */
+#define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
+
 /* Always Listening/VTSV */
 #define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
 #define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ON "true"
