@@ -25,12 +25,9 @@
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-#define FAMILY_ID_SYSFS	"/sys/spid/platform_family_id"
 #define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/timer_rate"
 #define UP_THRESHOLD_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load"
 #define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
-
-static int board_id ;
 
 struct intel_power_module{
 	struct power_module container;
@@ -59,29 +56,9 @@ static void sysfs_write(char *path, char *s)
     close(fd);
 }
 
-static char* sysfs_read(char *path)
-{	int len;
-	char *buf=NULL;
-    int fd = open(path, O_RDONLY);
-    if (fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-		return NULL;
-    }
-	buf = (char*)malloc(10);
-    len = read(fd,buf,sizeof(buf));
-    if (len < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-	}
-	close(fd);
-	return buf;
-
-}
 static void intel_power_init(struct power_module *module)
 {
 	ALOGW("**Intel Power HAL initialisation**\n");
-/*board_id can be used to set different parameters for different platforms*/
-	board_id = atoi(sysfs_read(FAMILY_ID_SYSFS));
-
 /*initialization*/
 	sysfs_write(TIMER_RATE_SYSFS,"100000");
 	sysfs_write(UP_THRESHOLD_SYSFS,"70");
