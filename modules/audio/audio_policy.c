@@ -89,6 +89,13 @@ static void ap_set_can_mute_enforced_audible(struct audio_policy *pol,
 {
 }
 
+/* if can_mute is true, then audio streams that are marked FM_RX
+ * can still be muted. */
+static void ap_set_can_mute_fm_rx(struct audio_policy *pol,
+                                             bool can_mute)
+{
+}
+
 static int ap_init_check(const struct audio_policy *pol)
 {
     return 0;
@@ -268,6 +275,7 @@ static int create_default_ap(const struct audio_policy_device *device,
     dap->policy.get_force_use = ap_get_force_use;
     dap->policy.set_can_mute_enforced_audible =
         ap_set_can_mute_enforced_audible;
+    dap->policy.set_can_mute_fm_rx = ap_set_can_mute_fm_rx;
     dap->policy.init_check = ap_init_check;
     dap->policy.get_output = ap_get_output;
     dap->policy.start_output = ap_start_output;

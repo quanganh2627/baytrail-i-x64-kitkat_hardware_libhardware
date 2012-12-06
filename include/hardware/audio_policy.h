@@ -122,6 +122,11 @@ struct audio_policy {
     void (*set_can_mute_enforced_audible)(struct audio_policy *pol,
                                           bool can_mute);
 
+    /* if can_mute is true, then audio streams that are marked FM_RX
+     * can still be muted. */
+    void (*set_can_mute_fm_rx)(struct audio_policy *pol,
+                                          bool can_mute);
+
     /* check proper initialization */
     int (*init_check)(const struct audio_policy *pol);
 
