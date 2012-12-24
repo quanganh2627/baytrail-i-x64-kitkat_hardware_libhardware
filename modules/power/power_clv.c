@@ -155,7 +155,6 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 		}
 		break;
 		case POWER_HINT_VSYNC:
-
 		if(intel->touchboost_disable == 1) {
 			vsync_time = clock();
 			diff = (((float)vsync_time - (float)curr_time) / CLOCKS_PER_SEC ) * 1000;
@@ -175,6 +174,16 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 					intel->vsync_boost = 0;
 			}
 		}
+		break;
+		case POWER_HINT_PAGELOADING:
+			/*
+			 * The data parameter is one to indicate
+			 * pageloading is requested, or zero for
+			 * pageloading no longer requested.
+			 */
+			if (1 == data) {
+				sysfs_write(BOOST_PULSE_SYSFS, "1");
+			}
 		break;
 		default:
 		break;
