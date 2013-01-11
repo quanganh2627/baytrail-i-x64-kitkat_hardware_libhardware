@@ -31,8 +31,6 @@
 
 struct intel_power_module{
 	struct power_module container;
-	int touch_event;
-	int vsync_count;
 };
 
 static void sysfs_write(char *path, char *s)
@@ -74,25 +72,8 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 	struct intel_power_module *intel_module = (struct intel_power_module*)module;
 	switch (hint) {
 		case POWER_HINT_INTERACTION:
-		if(intel_module->touch_event == 0){
-			intel_module->vsync_count = 4 ;
-			intel_module->touch_event = 1 ;
 			sysfs_write(BOOST_PULSE_SYSFS,"1");
-			sysfs_write(TIMER_RATE_SYSFS,"20000");
-		}
 		break;
-		case POWER_HINT_VSYNC:
-		if((data == 1) && (intel_module->vsync_count > 0)){
-			if(intel_module->vsync_count < 4)
-				sysfs_write(BOOST_PULSE_SYSFS,"1");
-			intel_module->vsync_count-=1;
-		}
-		if((data == 0) && (intel_module->touch_event == 1)){
-			sysfs_write(TIMER_RATE_SYSFS,"100000");
-			sysfs_write(BOOST_PULSE_SYSFS,"1");
-			intel_module->touch_event = 0;
-		}
-        break;
     default:
         break;
     }
@@ -119,6 +100,4 @@ struct intel_power_module HAL_MODULE_INFO_SYM = {
     setInteractive: intel_power_set_interactive,
     powerHint: intel_power_hint,
     },
-	touch_event: 0,
-	vsync_count: 0,
 };
