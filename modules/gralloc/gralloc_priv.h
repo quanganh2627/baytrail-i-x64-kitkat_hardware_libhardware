@@ -29,6 +29,12 @@
 
 #include <linux/fb.h>
 
+#define NUM_FB_BUFFERS 2
+
+#ifndef ALOGE
+#define ALOGE
+#endif
+
 /*****************************************************************************/
 
 struct private_module_t;
@@ -63,7 +69,9 @@ struct private_handle_t {
 #endif
 
     enum {
-        PRIV_FLAGS_FRAMEBUFFER = 0x00000001
+      PRIV_FLAGS_FRAMEBUFFER = 0x00000001,
+      PRIV_FLAGS_USES_UMP    = 0x00000002,
+      PRIV_FLAGS_USES_ION    = 0x00000004,
     };
 
     // file-descriptors

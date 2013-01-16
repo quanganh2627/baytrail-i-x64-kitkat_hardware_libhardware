@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2012 Intel Mobile Communications GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Jan 16 2013: Create minimum working hwcomposwer 
+ *
  */
 
 #include <hardware/hardware.h>
@@ -78,6 +82,17 @@ static int hwc_prepare(hwc_composer_device_1_t *dev,
     return 0;
 }
 
+static int hwc_blank(hwc_composer_device_1_t *dev, int disp, int blank)
+{
+    return 0;
+}
+
+static int hwc_eventControl(struct hwc_composer_device_1* dev, int disp,
+            int event, int enabled)
+{
+    return 0;
+}
+
 static int hwc_set(hwc_composer_device_1_t *dev,
         size_t numDisplays, hwc_display_contents_1_t** displays)
 {
@@ -123,6 +138,8 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
 
         dev->device.prepare = hwc_prepare;
         dev->device.set = hwc_set;
+        dev->device.blank = hwc_blank;
+        dev->device.eventControl = hwc_eventControl;
 
         *device = &dev->device.common;
         status = 0;
