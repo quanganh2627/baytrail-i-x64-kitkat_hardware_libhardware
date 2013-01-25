@@ -28,6 +28,9 @@
 #define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/timer_rate"
 #define UP_THRESHOLD_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load"
 #define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
+#define TOUCH_EVENT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/touch_event"
+#define VSYNC_COUNT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/vsync_count"
+#define VSYNC_DEC_SYSFS		"/sys/devices/system/cpu/cpufreq/interactive/vsync_dec"
 
 struct intel_power_module{
 	struct power_module container;
@@ -53,13 +56,31 @@ static void sysfs_write(char *path, char *s)
 
     close(fd);
 }
+static int sysfs_read(char *path, char *s, int num_bytes)
+{
+    char buf[80];
+    int count;
+    int ret = 0;
+	int fd = open(path, O_RDONLY);
+     if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error reading from %s: %s\n", path, buf);
+        return -1;
+    }
+    if ((count = read(fd, s, (num_bytes - 1))) < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error reading from  %s: %s\n", path, buf);
+        ret = -1;
+    } else {
+        s[count] = '\0';
+    }
+	close(fd);
+    return ret;
+}
 
 static void intel_power_init(struct power_module *module)
 {
 	ALOGW("**Intel Power HAL initialisation**\n");
-/*initialization*/
-	sysfs_write(TIMER_RATE_SYSFS,"100000");
-	sysfs_write(UP_THRESHOLD_SYSFS,"70");
 }
 
 static void intel_power_set_interactive(struct power_module *module, int on)
@@ -68,13 +89,44 @@ static void intel_power_set_interactive(struct power_module *module, int on)
 
 static void intel_power_hint(struct power_module *module, power_hint_t hint,
                        void *data) {
+	char sysfs_val[80];
 
-	struct intel_power_module *intel_module = (struct intel_power_module*)module;
 	switch (hint) {
 		case POWER_HINT_INTERACTION:
-			sysfs_write(BOOST_PULSE_SYSFS,"1");
+			if (sysfs_read(TOUCH_EVENT_SYSFS,sysfs_val,sizeof(sysfs_val)) == -1) {
+				ALOGE("Error in reading touch hint\n");
+			}
+			if((atoi(sysfs_val)) == 0) {
+				sysfs_write(TOUCH_EVENT_SYSFS,"1");
+				sysfs_write(BOOST_PULSE_SYSFS,"1");
+				sysfs_write(VSYNC_COUNT_SYSFS,"4");
+				sysfs_write(TIMER_RATE_SYSFS,"20000");
+			}
 		break;
-    default:
+
+		case POWER_HINT_VSYNC:
+			if (sysfs_read(VSYNC_COUNT_SYSFS,sysfs_val,sizeof(sysfs_val)) == -1) {
+				ALOGE("Error in reading vsync count\n");
+			}
+
+			if((data == 1) && ((atoi(sysfs_val)) > 0)) {
+				if((atoi(sysfs_val)) < 4)
+					sysfs_write(BOOST_PULSE_SYSFS,"1");
+				sysfs_write(VSYNC_DEC_SYSFS,"1");
+			}
+
+			if (sysfs_read(TOUCH_EVENT_SYSFS,sysfs_val,sizeof(sysfs_val)) == -1) {
+				ALOGE("Error in reading vsync hint\n");
+			}
+
+			if((data == 0) && ((atoi(sysfs_val)) == 1)) {
+			    sysfs_write(TIMER_RATE_SYSFS,"100000");
+				sysfs_write(BOOST_PULSE_SYSFS,"1");
+				sysfs_write(TOUCH_EVENT_SYSFS,"0");
+			}
+		break;
+
+	    default:
         break;
     }
 }
