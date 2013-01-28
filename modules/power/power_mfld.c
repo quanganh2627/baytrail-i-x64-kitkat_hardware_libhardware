@@ -26,7 +26,6 @@
 #include <hardware/power.h>
 
 #define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/timer_rate"
-#define UP_THRESHOLD_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load"
 #define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
 #define TOUCH_EVENT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/touch_event"
 #define VSYNC_COUNT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/vsync_count"
