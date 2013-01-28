@@ -25,12 +25,11 @@
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-#define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/timer_rate"
-#define UP_THRESHOLD_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load"
-#define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
-#define TOUCH_EVENT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/touch_event"
-#define VSYNC_COUNT_SYSFS	"/sys/devices/system/cpu/cpufreq/interactive/vsync_count"
-#define VSYNC_DEC_SYSFS		"/sys/devices/system/cpu/cpufreq/interactive/vsync_dec"
+#define TIMER_RATE_SYSFS	"/sys/devices/system/cpu/cpufreq/intel/timer_rate"
+#define BOOST_PULSE_SYSFS	"/sys/devices/system/cpu/cpufreq/intel/boostpulse"
+#define TOUCH_EVENT_SYSFS	"/sys/devices/system/cpu/cpufreq/intel/touch_event"
+#define VSYNC_COUNT_SYSFS	"/sys/devices/system/cpu/cpufreq/intel/vsync_count"
+#define VSYNC_DEC_SYSFS		"/sys/devices/system/cpu/cpufreq/intel/vsync_dec"
 
 struct intel_power_module{
 	struct power_module container;
@@ -120,7 +119,7 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 			}
 
 			if((data == 0) && ((atoi(sysfs_val)) == 1)) {
-			    sysfs_write(TIMER_RATE_SYSFS,"100000");
+			    sysfs_write(TIMER_RATE_SYSFS,"40000");
 				sysfs_write(BOOST_PULSE_SYSFS,"1");
 				sysfs_write(TOUCH_EVENT_SYSFS,"0");
 			}
