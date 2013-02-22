@@ -110,6 +110,9 @@ __BEGIN_DECLS
 /* Stream Flags */
 #define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
 
+/* Remote BGM state */
+#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
+
 /**
  *  audio stream parameters
  */
