@@ -1,4 +1,4 @@
-# Copyright (C) 2011 The Android Open Source Project
+# Copyright (C) 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := power.default
+# HAL module implemenation stored in
+# hw/<OVERLAY_HARDWARE_MODULE_ID>.<ro.product.board>.so
+
+LOCAL_MODULE := vibrator.default
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-ifeq ($(POWERHAL_CLV), true)
-	LOCAL_SRC_FILES := power_clv.c
-endif
-ifeq ($(POWERHAL_MFLD), true)
-	LOCAL_SRC_FILES := power_mfld.c
-endif
-ifeq ($(POWERHAL_GI), true)
-	LOCAL_SRC_FILES := power_mfld.c
-endif
+LOCAL_C_INCLUDES := hardware/libhardware_legacy
+LOCAL_SRC_FILES := vibrator.c
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
+
