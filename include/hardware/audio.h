@@ -67,7 +67,6 @@ __BEGIN_DECLS
 #define AUDIO_HARDWARE_MODULE_ID_A2DP "a2dp"
 #define AUDIO_HARDWARE_MODULE_ID_USB "usb"
 #define AUDIO_HARDWARE_MODULE_ID_REMOTE_SUBMIX "r_submix"
-#define AUDIO_HARDWARE_MODULE_ID_CODEC_OFFLOAD "codec_offload"
 
 /**************************************/
 
@@ -78,11 +77,6 @@ __BEGIN_DECLS
 /**
  *  audio device parameters
  */
-
-/* BT chip state */
-#define AUDIO_PARAMETER_KEY_BLUETOOTH_STATE "bluetooth_enabled"
-#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_ON "true"
-#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_OFF "false"
 
 /* BT SCO Noise Reduction + Echo Cancellation parameters */
 #define AUDIO_PARAMETER_KEY_BT_NREC "bt_headset_nrec"
@@ -96,19 +90,11 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_TTY_HCO "tty_hco"
 #define AUDIO_PARAMETER_VALUE_TTY_FULL "tty_full"
 
-/* HAC device selection */
-#define AUDIO_PARAMETER_KEY_HAC_SETTING "HACSetting"
-#define AUDIO_PARAMETER_VALUE_HAC_ON "ON"
-#define AUDIO_PARAMETER_VALUE_HAC_OFF "OFF"
-
 /* A2DP sink address set by framework */
 #define AUDIO_PARAMETER_A2DP_SINK_ADDRESS "a2dp_sink_address"
 
 /* Screen state */
 #define AUDIO_PARAMETER_KEY_SCREEN_STATE "screen_state"
-
-/* Stream Flags */
-#define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
 
 /**
  *  audio stream parameters
@@ -131,22 +117,6 @@ __BEGIN_DECLS
  * "sup_sampling_rates=44100|48000" */
 #define AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES "sup_sampling_rates"
 
-/**
-* audio codec parameters
-*/
-
-#define AUDIO_OFFLOAD_CODEC_PARAMS "music_offload_codec_param"
-#define AUDIO_OFFLOAD_CODEC_BIT_PER_SAMPLE "music_offload_bit_per_sample"
-#define AUDIO_OFFLOAD_CODEC_BIT_RATE "music_offload_bit_rate"
-#define AUDIO_OFFLOAD_CODEC_AVG_BIT_RATE "music_offload_avg_bit_rate"
-#define AUDIO_OFFLOAD_CODEC_ID "music_offload_codec_id"
-#define AUDIO_OFFLOAD_CODEC_BLOCK_ALIGN "music_offload_block_align"
-#define AUDIO_OFFLOAD_CODEC_SAMPLE_RATE "music_offload_sample_rate"
-#define AUDIO_OFFLOAD_CODEC_ENCODE_OPTION "music_offload_encode_option"
-#define AUDIO_OFFLOAD_CODEC_NUM_CHANNEL  "music_offload_num_channels"
-#define AUDIO_OFFLOAD_CODEC_DOWN_SAMPLING  "music_offload_down_sampling"
-#define AUDIO_OFFLOAD_CODEC_DELAY_SAMPLES  "delay_samples"
-#define AUDIO_OFFLOAD_CODEC_PADDING_SAMPLES  "padding_samples"
 
 /**************************************/
 
@@ -289,34 +259,6 @@ struct audio_stream_out {
     int (*get_next_write_timestamp)(const struct audio_stream_out *stream,
                                     int64_t *timestamp);
 
-    /**
-     * Notifies to the audio driver to stop playback however the queued buffers are
-     * retained by the hardware. Useful for implementing pause/resume. Empty implemented
-     * if not supported however should be implemented for hardware with non-trivial
-     * latency. In the pause state audio hardware could still be using power. User may
-     * consider calling suspend after a timeout.
-     */
-    int (*pause)(const struct audio_stream_out* stream);
-
-    /**
-     * Notifies to the audio driver to resume playback following a pause.
-     * Returns error if called without matching pause.
-     */
-    int (*resume)(const struct audio_stream_out* stream);
-
-    /**
-     * Blocks until the queued data is played back. Useful for Deep-buffered
-     * compressed or PCM streams. Empty implemented if not supported. Drain should
-     * return immediately on stop() and flush() call
-     */
-    int (*drain)(const struct audio_stream_out* stream);
-
-    /**
-     * Notifies to the audio driver to flush the queued data. Should be called after
-     * pause. Useful for implementing seek. Empty implemented if not supported however
-     * should be implemented for non-trivial latency.
-     */
-   int (*flush)(const struct audio_stream_out* stream);
 };
 typedef struct audio_stream_out audio_stream_out_t;
 
@@ -356,9 +298,6 @@ static inline size_t audio_stream_frame_size(const struct audio_stream *s)
     size_t chan_samp_sz;
 
     switch (s->get_format(s)) {
-    case AUDIO_FORMAT_MP3:
-    case AUDIO_FORMAT_AAC:
-        return sizeof(int8_t);
     case AUDIO_FORMAT_PCM_16_BIT:
         chan_samp_sz = sizeof(int16_t);
         break;
@@ -409,9 +348,6 @@ struct audio_hw_device {
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
     int (*set_voice_volume)(struct audio_hw_device *dev, float volume);
 
-    /** set fm rx playback volume. Range is between 0.0 and 1.0 */
-    int (*set_fm_rx_volume)(struct audio_hw_device *dev, float volume);
-
     /**
      * set the audio volume for all audio activities other than voice call.
      * Range between 0.0 and 1.0. If any value other than 0 is returned,
@@ -435,8 +371,6 @@ struct audio_hw_device {
      */
     int (*set_mode)(struct audio_hw_device *dev, audio_mode_t mode);
 
-    int (*set_fmrx_mode)(struct audio_hw_device *dev, int mode);
-
     /* mic mute */
     int (*set_mic_mute)(struct audio_hw_device *dev, bool state);
     int (*get_mic_mute)(const struct audio_hw_device *dev, bool *state);
@@ -457,10 +391,6 @@ struct audio_hw_device {
      */
     size_t (*get_input_buffer_size)(const struct audio_hw_device *dev,
                                     const struct audio_config *config);
-
-    size_t (*get_offload_buffer_size)(const struct audio_hw_device *dev,
-                                     uint32_t bitRate, uint32_t samplingRate,
-                                     uint32_t channel);
 
     /** This method creates and opens the audio hardware output stream */
     int (*open_output_stream)(struct audio_hw_device *dev,

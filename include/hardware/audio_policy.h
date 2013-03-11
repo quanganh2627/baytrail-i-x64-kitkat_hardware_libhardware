@@ -105,9 +105,6 @@ struct audio_policy {
     void (*set_ringer_mode)(struct audio_policy *pol, uint32_t mode,
                             uint32_t mask);
 
-    /* indicate a change in fm radio mode */
-    void (*set_fm_mode)(struct audio_policy *pol, uint32_t mode);
-
     /* force using a specific device category for the specified usage */
     void (*set_force_use)(struct audio_policy *pol,
                           audio_policy_force_use_t usage,
@@ -120,11 +117,6 @@ struct audio_policy {
     /* if can_mute is true, then audio streams that are marked ENFORCED_AUDIBLE
      * can still be muted. */
     void (*set_can_mute_enforced_audible)(struct audio_policy *pol,
-                                          bool can_mute);
-
-    /* if can_mute is true, then audio streams that are marked FM_RX
-     * can still be muted. */
-    void (*set_can_mute_fm_rx)(struct audio_policy *pol,
                                           bool can_mute);
 
     /* check proper initialization */
@@ -245,15 +237,6 @@ struct audio_policy {
 
     /* dump state */
     int (*dump)(const struct audio_policy *pol, int fd);
-
-    /*Check offload support */
-    bool (*is_offload_supported)(struct audio_policy *pol, uint32_t format,
-                                   audio_stream_type_t stream,
-                                   uint32_t samplingRate,
-                                   uint32_t bitRate,
-                                   int64_t duration,
-                                   bool isVideo,
-                                   bool isStreaming);
 };
 
 /* audio hw module handle used by load_hw_module(), open_output_on_module()
@@ -374,11 +357,6 @@ struct audio_policy_service_ops {
 
     /* set down link audio volume. */
     int (*set_voice_volume)(void *service,
-                            float volume,
-                            int delay_ms);
-
-    /* set fm rx playback audio volume. */
-    int (*set_fm_rx_volume)(void *service,
                             float volume,
                             int delay_ms);
 

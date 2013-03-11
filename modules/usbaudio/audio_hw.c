@@ -15,7 +15,7 @@
  */
 
 #define LOG_TAG "usb_audio_hw"
-//#define LOG_NDEBUG 0
+/*#define LOG_NDEBUG 0*/
 
 #include <errno.h>
 #include <pthread.h>
@@ -73,7 +73,6 @@ static int start_output_stream(struct stream_out *out)
     struct audio_device *adev = out->dev;
     int i;
 
-    ALOGV("%s enter",__func__);
     if ((adev->card < 0) || (adev->device < 0))
         return -EINVAL;
 
@@ -85,7 +84,6 @@ static int start_output_stream(struct stream_out *out)
         return -ENOMEM;
     }
 
-    ALOGV("%s exit",__func__);
     return 0;
 }
 
@@ -104,7 +102,6 @@ static int out_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 static size_t out_get_buffer_size(const struct audio_stream *stream)
 {
     return pcm_config.period_size *
-           pcm_config.period_count *
            audio_stream_frame_size((struct audio_stream *)stream);
 }
 
@@ -127,7 +124,6 @@ static int out_standby(struct audio_stream *stream)
 {
     struct stream_out *out = (struct stream_out *)stream;
 
-    ALOGV("%s enter standby = %d",__func__,out->standby);
     pthread_mutex_lock(&out->dev->lock);
     pthread_mutex_lock(&out->lock);
 
@@ -135,13 +131,11 @@ static int out_standby(struct audio_stream *stream)
         pcm_close(out->pcm);
         out->pcm = NULL;
         out->standby = true;
-        ALOGV("%s PCM device closed",__func__);
     }
 
     pthread_mutex_unlock(&out->lock);
     pthread_mutex_unlock(&out->dev->lock);
 
-    ALOGV("%s exit",__func__);
     return 0;
 }
 
@@ -159,8 +153,6 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
     int ret;
     int routing = 0;
 
-    ALOGV("%s enter",__func__);
-
     parms = str_parms_create_str(kvpairs);
     pthread_mutex_lock(&adev->lock);
 
@@ -175,7 +167,6 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
     pthread_mutex_unlock(&adev->lock);
     str_parms_destroy(parms);
 
-    ALOGV("%s exit",__func__);
     return 0;
 }
 
@@ -202,8 +193,6 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     int ret;
     struct stream_out *out = (struct stream_out *)stream;
 
-    ALOGV("%s enter",__func__);
-
     pthread_mutex_lock(&out->dev->lock);
     pthread_mutex_lock(&out->lock);
     if (out->standby) {
@@ -214,26 +203,16 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         out->standby = false;
     }
 
-    if(!out->pcm){
-       ALOGD("%s: null handle to write - device already closed",__func__);
-       goto err;
-    }
-    ret = pcm_write(out->pcm, (void *)buffer, bytes);
-
-    ALOGV("%s: pcm_write returned = %d",__func__,ret);
+    pcm_write(out->pcm, (void *)buffer, bytes);
 
     pthread_mutex_unlock(&out->lock);
     pthread_mutex_unlock(&out->dev->lock);
-
-    ALOGV("%s exit",__func__);
 
     return bytes;
 
 err:
     pthread_mutex_unlock(&out->lock);
-    pthread_mutex_unlock(&out->dev->lock);
 
-    ALOGV("%s Silence write",__func__);
     if (ret != 0) {
         usleep(bytes * 1000000 / audio_stream_frame_size(&stream->common) /
                out_get_sample_rate(&stream->common));
@@ -274,7 +253,6 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     struct audio_device *adev = (struct audio_device *)dev;
     struct stream_out *out;
     int ret;
-    ALOGV("%s enter",__func__);
 
     out = (struct stream_out *)calloc(1, sizeof(struct stream_out));
     if (!out)
@@ -310,11 +288,9 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     adev->device = -1;
 
     *stream_out = &out->stream;
-    ALOGV("%s exit",__func__);
     return 0;
 
 err_open:
-    ALOGE("%s exit with error",__func__);
     free(out);
     *stream_out = NULL;
     return ret;
@@ -325,10 +301,8 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 {
     struct stream_out *out = (struct stream_out *)stream;
 
-    ALOGV("%s enter",__func__);
     out_standby(&stream->common);
     free(stream);
-    ALOGV("%s exit",__func__);
 }
 
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
@@ -411,8 +385,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     struct audio_device *adev;
     int ret;
 
-    ALOGV("%s enter",__func__);
-
     if (strcmp(name, AUDIO_HARDWARE_INTERFACE) != 0)
         return -EINVAL;
 
@@ -441,8 +413,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->hw_device.dump = adev_dump;
 
     *device = &adev->hw_device.common;
-
-    ALOGV("%s exit",__func__);
 
     return 0;
 }

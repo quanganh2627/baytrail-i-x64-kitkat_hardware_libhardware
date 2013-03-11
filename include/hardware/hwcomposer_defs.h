@@ -64,13 +64,7 @@ enum {
      * SurfaceFlinger will only honor this flag when the layer has no blending
      *
      */
-    HWC_HINT_CLEAR_FB       = 0x00000002,
-
-    /*
-     * HWC set HWC_HINT_DISABLE_ANIMATION hint to indicate to SurfaceFlinger
-     * that it should bypass creating screen shot layer for rotation animation.
-     */
-    HWC_HINT_DISABLE_ANIMATION  = 0x00000004
+    HWC_HINT_CLEAR_FB       = 0x00000002
 };
 
 /*
