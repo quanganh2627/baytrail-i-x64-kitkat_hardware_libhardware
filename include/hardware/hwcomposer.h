@@ -284,6 +284,12 @@ enum {
      * and acquire fences.
      */
     HWC_GEOMETRY_CHANGED = 0x00000001,
+
+    /*
+     * HWC_ROTATION_IN_PROGRESS is set by SurfaceFlinger to indicate that the
+     * window system is still in the progress of a rotation.
+     */
+    HWC_ROTATION_IN_PROGRESS = 0x00000010,
 };
 
 /*
