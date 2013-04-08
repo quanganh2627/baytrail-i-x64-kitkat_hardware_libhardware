@@ -246,6 +246,9 @@ struct audio_policy {
     /* check if offload is possible for given sample rate, bitrate, duration, ... */
     bool (*is_offload_supported)(const struct audio_policy *pol,
                                 const audio_offload_info_t *info);
+
+    int (*set_parameters)(struct audio_policy *pol, const char *keyValuePairs);
+
 };
 
 /* audio hw module handle used by load_hw_module(), open_output_on_module()
