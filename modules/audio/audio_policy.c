@@ -236,6 +236,11 @@ static bool ap_is_offload_supported(const struct audio_policy *pol,
     return false;
 }
 
+static int ap_set_parameters(struct audio_policy *pol, const char *keyValuePairs)
+{
+    return 0;
+}
+
 static int create_default_ap(const struct audio_policy_device *device,
                              struct audio_policy_service_ops *aps_ops,
                              void *service,
@@ -286,6 +291,8 @@ static int create_default_ap(const struct audio_policy_device *device,
     dap->policy.dump = ap_dump;
 
     dap->policy.is_offload_supported = ap_is_offload_supported;
+
+    dap->policy.set_parameters = ap_set_parameters;
 
     dap->service = service;
     dap->aps_ops = aps_ops;
