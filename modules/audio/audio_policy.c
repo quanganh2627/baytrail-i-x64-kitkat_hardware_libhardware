@@ -235,6 +235,7 @@ static bool ap_is_offload_supported(struct audio_policy *pol,
                                    uint32_t samplingRate,
                                    uint32_t bitRate,
                                    int64_t duration,
+                                   int sessionId,
                                    bool isVideo,
                                    bool isStreaming)
 {
