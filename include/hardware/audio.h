@@ -113,6 +113,11 @@ __BEGIN_DECLS
 /* Remote BGM state */
 #define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
 
+/* Context awareness */
+#define AUDIO_PARAMETER_KEY_CONTEXT_AWARENESS_STATUS "context_awareness_status"
+#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_ON "on"
+#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_OFF "off"
+
 /**
  *  audio stream parameters
  */
