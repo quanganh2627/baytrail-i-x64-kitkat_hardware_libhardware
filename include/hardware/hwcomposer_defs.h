@@ -81,6 +81,12 @@ enum {
      * by SurfaceFlinger (just as if compositionType was set to HWC_OVERLAY).
      */
     HWC_SKIP_LAYER = 0x00000001,
+
+    /*
+     * HWC_TRICK_MODE indicates the layer needs to be rendered on the
+     * display device. Currently it is used on hdmi extend video mode.
+     */
+    HWC_TRICK_MODE = 0x10000000,
 };
 
 /*
