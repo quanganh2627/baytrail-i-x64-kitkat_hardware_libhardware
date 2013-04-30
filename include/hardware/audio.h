@@ -78,6 +78,11 @@ __BEGIN_DECLS
  *  audio device parameters
  */
 
+/* BT chip state */
+#define AUDIO_PARAMETER_KEY_BLUETOOTH_STATE "bluetooth_enabled"
+#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_ON "true"
+#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_OFF "false"
+
 /* BT SCO Noise Reduction + Echo Cancellation parameters */
 #define AUDIO_PARAMETER_KEY_BT_NREC "bt_headset_nrec"
 #define AUDIO_PARAMETER_VALUE_ON "on"
