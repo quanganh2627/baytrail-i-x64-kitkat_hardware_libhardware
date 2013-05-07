@@ -26,6 +26,7 @@
 
 #include <system/audio.h>
 #include <system/audio_policy.h>
+#include <hardware/audio.h> /* for struct audio_config */
 
 __BEGIN_DECLS
 
@@ -243,14 +244,8 @@ struct audio_policy {
     int (*dump)(const struct audio_policy *pol, int fd);
 
     /*Check offload support */
-    bool (*is_offload_supported)(struct audio_policy *pol, uint32_t format,
-                                   audio_stream_type_t stream,
-                                   uint32_t samplingRate,
-                                   uint32_t bitRate,
-                                   int64_t duration,
-                                   int sessionId,
-                                   bool isVideo,
-                                   bool isStreaming);
+    bool (*is_offload_supported)(struct audio_policy *pol,
+                                 const struct audio_offload_info* config);
 };
 
 /* audio hw module handle used by load_hw_module(), open_output_on_module()
