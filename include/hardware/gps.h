@@ -192,9 +192,10 @@ typedef uint16_t AGpsStatusValue;
 /** AGPS data connection failed */
 #define GPS_AGPS_DATA_CONN_FAILED   5
 
+#define AGPS_REF_LOCATION_END               0
 #define AGPS_REF_LOCATION_TYPE_GSM_CELLID   1
 #define AGPS_REF_LOCATION_TYPE_UMTS_CELLID  2
-#define AGPS_REG_LOCATION_TYPE_MAC          3
+#define AGPS_REF_LOCATION_TYPE_MAC          3
 
 /** Network types for update_network_state "type" parameter */
 #define AGPS_RIL_NETWORK_TYPE_MOBILE        0
@@ -632,8 +633,8 @@ struct gps_device_t {
 #define AGPS_RIL_REQUEST_SETID_IMSI     (1<<0L)
 #define AGPS_RIL_REQUEST_SETID_MSISDN   (1<<1L)
 
-#define AGPS_RIL_REQUEST_REFLOC_CELLID  (1<<0L)
-#define AGPS_RIL_REQUEST_REFLOC_MAC     (1<<1L)
+#define AGPS_REQUEST_REFLOC_CELLID  (1<<0L)
+#define AGPS_REQUEST_REFLOC_MAC     (1<<1L)
 
 typedef void (*agps_ril_request_set_id)(uint32_t flags);
 typedef void (*agps_ril_request_ref_loc)(uint32_t flags);
