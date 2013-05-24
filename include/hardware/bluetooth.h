@@ -467,6 +467,10 @@ typedef struct {
     /* Configure DUT Mode - Use this mode to enter/exit DUT mode */
     int (*dut_mode_configure)(uint8_t enable);
 
+    /*enable HCI logging dynamically */
+    int (*hci_logging)(int status);
+    int (*set_hci_logging)(int status);
+
     /* Send any test HCI (vendor-specific) command to the controller. Must be in DUT Mode */
     int (*dut_mode_send)(uint16_t opcode, uint8_t *buf, uint8_t len);
     /** BLE Test Mode APIs */
