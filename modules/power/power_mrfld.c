@@ -135,7 +135,6 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 			intel->touchboost_disable = 0;
 			vsync_count = 0;
 			consecutive_touch_int = 0;
-			sysfs_write(TIMER_RATE_SYSFS,"100000");
 		}
 		/* Simple touch: timer rate need not be changed here */
 		if((diff < SHORT_TOUCH_TIME) && (intel->touchboost_disable == 0)
@@ -148,7 +147,6 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 		if((intel->touchboost_disable == 1) && (consecutive_touch_int > 15)
 												&& (intel->timer_set == 0)) {
 			intel->timer_set = 1;
-			sysfs_write(TIMER_RATE_SYSFS,"20000");
 		}
 		if (!intel->touchboost_disable) {
 			sysfs_write(BOOST_PULSE_SYSFS,"1");
@@ -160,7 +158,6 @@ static void intel_power_hint(struct power_module *module, power_hint_t hint,
 			vsync_time = clock();
 			diff = (((float)vsync_time - (float)curr_time) / CLOCKS_PER_SEC ) * 1000;
 			if(diff > VSYNC_TOCUH_TIME) {
-				sysfs_write(TIMER_RATE_SYSFS,"100000");
 				intel->timer_set = 0;
 				intel->vsync_boost = 1;
 				intel->touchboost_disable = 0;
