@@ -30,7 +30,7 @@ endif
 
 ifeq ($(POWERHAL_MRFLD), true)
 	LOCAL_SRC_FILES := power_mrfld.c
-endif /*POWERHAL MRFLD*/
+endif
 
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_TAGS := optional
