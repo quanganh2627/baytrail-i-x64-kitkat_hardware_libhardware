@@ -22,7 +22,8 @@ LOCAL_C_INCLUDES := hardware/libhardware
 
 ifeq ($(BCUHAL_MRFLD), true)
     LOCAL_SRC_FILES := \
-        bcu.c
+        bcu.c \
+        bcu_mrfld.c
 endif
 
 LOCAL_SHARED_LIBRARIES := liblog
