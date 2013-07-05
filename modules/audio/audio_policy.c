@@ -239,7 +239,6 @@ static bool ap_is_offload_supported(struct audio_policy *pol,
                                    bool isVideo,
                                    bool isStreaming)
 {
-    ALOGV("legacy in use. ap_is_offload_supported");
     return 0;
 }
 
