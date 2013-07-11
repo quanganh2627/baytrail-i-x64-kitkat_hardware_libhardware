@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2011-2013 Intel Mobile Communications GmbH
+ * Copyright (C) 2013 Capital Alliance Software LTD (Pekall)
  * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -364,6 +366,10 @@ struct audio_policy_service_ops {
     int (*set_voice_volume)(void *service,
                             float volume,
                             int delay_ms);
+
+    int (*set_fm_volume)(void *service,
+                         float volume,
+                         int delay_ms);
 
     /* move effect to the specified output */
     int (*move_effects)(void *service,
