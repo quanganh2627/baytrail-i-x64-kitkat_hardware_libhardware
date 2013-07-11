@@ -119,6 +119,11 @@ __BEGIN_DECLS
  * "sup_sampling_rates=44100|48000" */
 #define AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES "sup_sampling_rates"
 
+/* BT SCO link sampling rate selection */
+#define AUDIO_PARAMETER_KEY_BT_SCO_SR "bthf_rate"
+#define AUDIO_PARAMETER_VALUE_BT_SCO_SR_8KHZ "8khz"
+#define AUDIO_PARAMETER_VALUE_BT_SCO_SR_16KHZ "16khz"
+
 /**
  * audio codec parameters
  */
