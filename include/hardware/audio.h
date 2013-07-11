@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2011-2013 Intel Mobile Communications GmbH
+ * Copyright (C) 2013 Capital Alliance Software LTD (Pekall)
  * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #ifndef ANDROID_AUDIO_HAL_INTERFACE_H
 #define ANDROID_AUDIO_HAL_INTERFACE_H
@@ -157,6 +158,21 @@ __BEGIN_DECLS
 #define AUDIO_OFFLOAD_CODEC_DOWN_SAMPLING  "music_offload_down_sampling"
 #define AUDIO_OFFLOAD_CODEC_DELAY_SAMPLES  "delay_samples"
 #define AUDIO_OFFLOAD_CODEC_PADDING_SAMPLES  "padding_samples"
+
+/**
+ * BT SCO link sampling rate selection
+ */
+
+#define AUDIO_PARAMETER_KEY_BT_SCO_SR "bthf_rate"
+#define AUDIO_PARAMETER_VALUE_BT_SCO_SR_8KHZ "8khz"
+#define AUDIO_PARAMETER_VALUE_BT_SCO_SR_16KHZ "16khz"
+
+// PEKALL FMR begin:
+#define AUDIO_PARAMETER_FM_ON "fm_on"
+#define AUDIO_PARAMETER_FM_OFF "fm_off"
+
+#define AUDIO_PARAMETER_FMR_RX_VOLUME "fmr_rx_volume"
+// PEKALL FMR end
 
 /**************************************/
 
@@ -521,6 +537,9 @@ struct audio_hw_device {
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
     int (*set_voice_volume)(struct audio_hw_device *dev, float volume);
 
+    // PEKALL FMR begin:
+    int (*set_fm_volume)(struct audio_hw_device *dev, float volume);
+    // PEKALL FMR end
     /**
      * set the audio volume for all audio activities other than voice call.
      * Range between 0.0 and 1.0. If any value other than 0 is returned,
