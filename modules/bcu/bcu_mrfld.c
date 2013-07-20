@@ -28,7 +28,7 @@
 #include <hardware/bcu.h>
 
 #define BCU_CAMFLASH_SYSFS \
-            "/sys/devices/platform/bcove_bcu/mrfl_current/camflash_ctrl"
+            "/sys/devices/platform/bcove_bcu/camflash_ctrl"
 
 #define LEVEL_LOW         0
 #define LEVEL_HIGH        1
