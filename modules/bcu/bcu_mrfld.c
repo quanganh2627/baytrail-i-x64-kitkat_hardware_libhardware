@@ -45,7 +45,7 @@ static int write_sysfs(char const *path, uint8_t data)
     char buf[80];
     int fd = open(path, O_WRONLY);
     if (fd >= 0) {
-        char buffer[4];
+        char buffer[6] = {'\0'};
         int bytes = sprintf(buffer, "%d\n", data);
         int amt = write(fd, buffer, bytes);
         if (amt < 0) {
