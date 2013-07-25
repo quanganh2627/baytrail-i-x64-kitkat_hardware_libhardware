@@ -1,2 +1,2 @@
-hardware_modules := gralloc hwcomposer audio nfc nfc-nci local_time power usbaudio audio_remote_submix vibrator bcu
+hardware_modules := gralloc hwcomposer audio nfc nfc-nci local_time power usbaudio audio_remote_submix vibrator bcu_audioif bcu
 include $(call all-named-subdir-makefiles,$(hardware_modules))
