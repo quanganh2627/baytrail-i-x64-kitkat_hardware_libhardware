@@ -86,10 +86,17 @@ enum {
     HWC_SKIP_LAYER = 0x00000001,
 
     /*
+     * HWC_HAS_VIDEO_SESSION_ID indicates the layer has a video session ID
+     * which is allocated by MDS(HDMI Middleware)
+     * Bit 24 ~ 27 are used too
+     */
+    HWC_HAS_VIDEO_SESSION_ID = 0x20000000,
+
+    /*
      * HWC_TRICK_MODE indicates the layer needs to be rendered on the
      * display device. Currently it is used on hdmi extend video mode.
      */
-    HWC_TRICK_MODE = 0x10000000,
+    HWC_TRICK_MODE = 0x40000000,
 };
 
 /*
