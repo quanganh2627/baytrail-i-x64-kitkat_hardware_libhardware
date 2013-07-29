@@ -1,4 +1,15 @@
 /*
+ * Copyright (C) 2012-2013 Intel Mobile Communications GmbH
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +48,8 @@ typedef enum {
     BTHF_AUDIO_STATE_DISCONNECTED = 0,
     BTHF_AUDIO_STATE_CONNECTING,
     BTHF_AUDIO_STATE_CONNECTED,
-    BTHF_AUDIO_STATE_DISCONNECTING
+    BTHF_AUDIO_STATE_DISCONNECTING,
+    BTHF_AUDIO_STATE_CONNECTED_MSBC
 } bthf_audio_state_t;
 
 typedef enum {
