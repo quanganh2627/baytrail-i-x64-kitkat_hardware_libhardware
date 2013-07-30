@@ -1,4 +1,8 @@
 /*
+ * Copyright (C) 2013 Intel Mobile Communications GmbH
+ * Notes:
+ * Mon Jul 29 17:41:49 2013 +0530: Add dynamic HCI trace for Android
+ *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
