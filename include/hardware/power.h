@@ -44,7 +44,8 @@ typedef enum {
      * KLP.
      */
     POWER_HINT_VIDEO_ENCODE = 0x00000003,
-    POWER_HINT_VIDEO_DECODE = 0x00000004
+    POWER_HINT_VIDEO_DECODE = 0x00000004,
+    POWER_HINT_PAGELOADING = 0X00000005
 } power_hint_t;
 
 /**
@@ -111,6 +112,14 @@ typedef struct power_module {
      *     events are incoming.  CPU and GPU load may be expected soon,
      *     and it may be appropriate to raise speeds of CPU, memory bus,
      *     etc.  The data parameter is unused.
+     *
+     * POWER_HINT_PAGELOADING
+     *     Browser has started or stopped requesting web pagloading. If
+     *     the browser has requested pageloading, then CPU and GPU load is
+     *     expected soon, and it may be approriate to raise speeds of CPU
+     *     memory bus, etc. The data parameter is non-zero to indicate
+     *     pageloading is now requested, or zero for pageloading is no
+     *     longer requested.
      *
      * A particular platform may choose to ignore any hint.
      *
