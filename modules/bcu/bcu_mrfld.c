@@ -19,11 +19,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include<time.h>
+#include <time.h>
 
 #define LOG_TAG "Intel MRFL BCUHAL"
 #include <utils/Log.h>
 
+#include <hardware/bcu_audio_interface.h>
 #include <hardware/hardware.h>
 #include <hardware/bcu.h>
 
@@ -34,6 +35,7 @@
 #define LEVEL_HIGH        1
 #define MAXSYSFS_DATA_SIZ 8
 
+struct audio_throttle *bcu_audioif;
 /**
  * Generic function to write the data into sysfs interface (path which is
  * provided as a input argument in path).
@@ -91,8 +93,8 @@ static int read_sysfs(char const *path, char *data, int num_bytes)
 int mrfl_setaudio_throttle(uint8_t level)
 {
     ALOGD("MRFL BCU_HAL: %s level %d\n", __func__, level);
-    /* TODO: Need to add the respective HAL Function Call */
-    return 0;
+    /* Audio HAL interface function to throttle the speaker power */
+    return bcu_audioif->audioSetThrottle(level);
 }
 
 int mrfl_setcamera_throttle(uint8_t level)
@@ -130,9 +132,10 @@ int mrfl_getaudio_throttle(uint8_t *level)
 {
     int ret = 0;
 
-    /* ret = TODO: Need to add the respective HAL Function Call */
+    /* Audio HAL interface function to get the current audio throttle level */
+    ret = bcu_audioif->audioGetThrottle();
     if (ret < 0) {
-        ALOGE("MRFL BCU_HAL: Error in %s\n", __func__);
+        ALOGE("MRFL BCU_HAL: Error in %s error code: %d\n", __func__,ret);
         return ret;
     }
 
@@ -218,5 +221,13 @@ static struct bcu_throttle mrfl_bcu_throttle = {
 void get_throttle_info(struct bcu_throttle **throttle_info)
 {
     ALOGI("MRFL BCU_HAL: Inside %s\n", __func__);
+
+     /* getting audio interface throttling info for get/set audio throttling */
+     get_bcu_audioif_info(&bcu_audioif);
+
+     /**
+     * providing the initialized platform specific throttling info to get/set
+     * the bcu throttling.
+     */
     *throttle_info = &mrfl_bcu_throttle;
 }
