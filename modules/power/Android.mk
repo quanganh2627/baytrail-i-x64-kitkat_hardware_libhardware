@@ -18,7 +18,23 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := power.default
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-LOCAL_SRC_FILES := power.c
+
+ifeq ($(POWERHAL_CLV), true)
+	LOCAL_SRC_FILES := power_clv.c
+endif
+ifeq ($(POWERHAL_MFLD), true)
+	LOCAL_SRC_FILES := power_mfld.c
+endif
+ifeq ($(POWERHAL_GI), true)
+	LOCAL_SRC_FILES := power_mfld.c
+endif
+ifeq ($(POWERHAL_MRFLD), true)
+	LOCAL_SRC_FILES := power_mrfld.c
+endif
+ifeq ($(POWERHAL_BYT), true)
+	LOCAL_SRC_FILES := power_byt.c
+endif
+
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_TAGS := optional
 
