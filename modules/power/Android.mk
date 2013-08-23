@@ -27,9 +27,11 @@ endif
 ifeq ($(POWERHAL_GI), true)
 	LOCAL_SRC_FILES := power_mfld.c
 endif
-
 ifeq ($(POWERHAL_MRFLD), true)
 	LOCAL_SRC_FILES := power_mrfld.c
+endif
+ifeq ($(POWERHAL_BYT), true)
+	LOCAL_SRC_FILES := power_byt.c
 endif
 
 LOCAL_SHARED_LIBRARIES := liblog
