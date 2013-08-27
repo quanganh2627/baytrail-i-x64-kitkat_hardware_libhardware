@@ -62,9 +62,9 @@ static int load(const char *id,
         const char *path,
         const struct hw_module_t **pHmi)
 {
-    int status = -EINVAL;
-    void *handle = NULL;
-    struct hw_module_t *hmi = NULL;
+    int status;
+    void *handle;
+    struct hw_module_t *hmi;
 
     /*
      * load the symbols resolving undefined symbols before
@@ -120,11 +120,12 @@ static int load(const char *id,
 int hw_get_module_by_class(const char *class_id, const char *inst,
                            const struct hw_module_t **module)
 {
-    int status = -EINVAL;
-    int i = 0;
-    char prop[PATH_MAX] = {0};
-    char path[PATH_MAX] = {0};
-    char name[PATH_MAX] = {0};
+    int status;
+    int i;
+    const struct hw_module_t *hmi = NULL;
+    char prop[PATH_MAX];
+    char path[PATH_MAX];
+    char name[PATH_MAX];
 
     if (inst)
         snprintf(name, PATH_MAX, "%s.%s", class_id, inst);

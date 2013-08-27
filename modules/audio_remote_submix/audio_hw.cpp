@@ -23,6 +23,10 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
+#include <cutils/log.h>
+#include <cutils/str_parms.h>
+#include <cutils/properties.h>
+
 #include <hardware/hardware.h>
 #include <system/audio.h>
 #include <hardware/audio.h>
@@ -35,10 +39,6 @@
 #include <media/AudioParameter.h>
 
 extern "C" {
-
-#include <cutils/log.h>
-#include <cutils/str_parms.h>
-#include <cutils/properties.h>
 
 namespace android {
 
@@ -77,11 +77,6 @@ struct submix_audio_device {
 
     // device lock, also used to protect access to the audio pipe
     pthread_mutex_t lock;
-    // remote bgm state - true, false
-    char *bgmstate;
-    //bgm player session
-    char* bgmsession;
-
 };
 
 struct submix_stream_out {
@@ -100,10 +95,6 @@ struct submix_stream_in {
     int64_t read_counter_frames;
 };
 
-
-/*Different audio streams across player sessions are
-  possible. hence save the stream state*/
-static char* gbgm_audio = "true";
 
 /* audio HAL functions */
 
@@ -622,149 +613,13 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
-    struct submix_audio_device *adev = (struct submix_audio_device *)dev;
-    char *key,*value;
-    struct str_parms *param;
-    int session = 0;
-    int keyvalue = 0;
-    char * kvp = NULL;
-    int err = 0;
-
-    if ((kvpairs == NULL) && (adev == NULL)) {
-        ALOGE("%s NUll inputs kvpairs = %s, adev = %d",__func__, kvpairs,(int)adev);
-        return err;
-    }
-
-    kvp = (char*)kvpairs;
-    ALOGV("%s entered with key-value pair %s", __func__,kvpairs);
-
-    key = strtok(kvp,"=");
-    value = strtok(NULL, "=");
-    if (key != NULL) {
-       if (strcmp(key, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE) == 0) {
-           adev->bgmstate = strdup("false");
-           if (value != NULL) {
-               if (strcmp(value, "true") == 0) {
-                  adev->bgmstate = strdup("true");
-               }
-           }
-       }
-
-       if (strcmp(key, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO) == 0) {
-           /*by default audio stream is active*/
-           gbgm_audio = strdup("true");
-           if (value != NULL) {
-               if (strcmp(value, "0") == 0) {
-                  gbgm_audio = strdup("false");
-               }
-           }
-           ALOGV("%s : audio state in BGM = %s",__func__,gbgm_audio);
-       }
-
-       if (strcmp(key, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID) == 0) {
-           if (value != NULL) {
-               adev->bgmsession = strdup(value);
-           }
-       }
-    }
-
-    ALOGV("%s exit bgmstate = %s, bgmaudio = %s bgmplayersession = %d",
-                __func__,adev->bgmstate,gbgm_audio,atoi(adev->bgmsession));
-
-    return 0;
+    return -ENOSYS;
 }
 
 static char * adev_get_parameters(const struct audio_hw_device *dev,
                                   const char *keys)
 {
-    struct submix_audio_device *adev = (struct submix_audio_device *)dev;
-    char value[32];
-
-    ALOGV("%s entered with keys %s", __func__,keys);
-
-    if (strcmp(keys, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE) == 0) {
-        struct str_parms *parms = str_parms_create_str(keys);
-        if(!parms) {
-           ALOGE("%s failed for bgm_state",__func__);
-           goto error_exit;
-        }
-        int ret = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE,
-                                     value, sizeof(value));
-        char *str;
-
-        str_parms_destroy(parms);
-        if (ret >= 0) {
-           ALOGV("%s adev->bgmstate %s", __func__,adev->bgmstate);
-           parms = str_parms_create_str(adev->bgmstate);
-           if(!parms) {
-              ALOGE("%s failed for bgm_state",__func__);
-              goto error_exit;
-           }
-           str = str_parms_to_str(parms);
-           str = strtok(str, "=");
-           str_parms_destroy(parms);
-           ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
-           return str;
-        }
-    }
-
-    if (strcmp(keys, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO) == 0) {
-       struct str_parms *parms = str_parms_create_str(keys);
-        if(!parms) {
-           ALOGE("%s failed for bgm_audio",__func__);
-           goto error_exit;
-        }
-       int ret = str_parms_get_str(parms, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO,
-                                     value, sizeof(value));
-       char *str;
-
-       str_parms_destroy(parms);
-       if (ret >= 0) {
-          ALOGV("%s gbgm_audio %s", __func__,gbgm_audio);
-          parms = str_parms_create_str(gbgm_audio);
-          if(!parms) {
-             ALOGE("%s failed for bgm_state",__func__);
-             goto error_exit;
-          }
-          str = str_parms_to_str(parms);
-          str = strtok(str, "=");
-          str_parms_destroy(parms);
-          ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
-          return str;
-       }
-    }
-
-    if (strcmp(keys, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID) == 0) {
-       struct str_parms *parms = str_parms_create_str(keys);
-        if(!parms) {
-           ALOGE("%s failed for bgm_session",__func__);
-           goto error_exit;
-        }
-       int ret = str_parms_get_str(parms, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID,
-                                     value, sizeof(value));
-       char *str;
-
-       str_parms_destroy(parms);
-       if (ret >= 0) {
-          ALOGV("%s adev->bgmsession %s", __func__,adev->bgmsession);
-          parms = str_parms_create_str(adev->bgmsession);
-          if(!parms) {
-             ALOGE("%s failed for bgm_state",__func__);
-             goto error_exit;
-          }
-          str = str_parms_to_str(parms);
-          str = strtok(str, "=");
-          str_parms_destroy(parms);
-          ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
-          return str;
-       }
-    }
-
-    ALOGV("%s exit bgmstate = %s, bgmaudio = %s bgmplayersession = %d",
-                __func__,adev->bgmstate,gbgm_audio,atoi(adev->bgmsession));
-
-error_exit:
-    return strdup("");
+    return strdup("");;
 }
 
 static int adev_init_check(const struct audio_hw_device *dev)
@@ -929,9 +784,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     rsxadev = (submix_audio_device*) calloc(1, sizeof(struct submix_audio_device));
     if (!rsxadev)
         return -ENOMEM;
-
-    rsxadev->bgmstate = "false";
-    rsxadev->bgmsession = "0";
 
     rsxadev->device.common.tag = HARDWARE_DEVICE_TAG;
     rsxadev->device.common.version = AUDIO_DEVICE_API_VERSION_2_0;

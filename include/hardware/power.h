@@ -41,7 +41,6 @@ __BEGIN_DECLS
 typedef enum {
     POWER_HINT_VSYNC = 0x00000001,
     POWER_HINT_INTERACTION = 0x00000002,
-    POWER_HINT_PAGELOADING = 0x00000003,
 } power_hint_t;
 
 /**
@@ -108,15 +107,6 @@ typedef struct power_module {
      *     events are incoming.  CPU and GPU load may be expected soon,
      *     and it may be appropriate to raise speeds of CPU, memory bus,
      *     etc.  The data parameter is unused.
-     *
-     * POWER_HINT_PAGELOADING
-     *
-     *     Browser has started or stopped requesting web pageloading. If
-     *     the browser has requested pageloading, then CPU and GPU load is
-     *     expected soon, and it may be appropriate to raise speeds of CPU,
-     *     memory bus, etc. The data parameter is non-zero to indicate
-     *     pageloading is now requested, or zero for pageloading is no longer
-     *     requested.
      *
      * A particular platform may choose to ignore any hint.
      *

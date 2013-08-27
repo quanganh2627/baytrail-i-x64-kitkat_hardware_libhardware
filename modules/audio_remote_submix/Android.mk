@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES += \
 	frameworks/av/include/ \
 	frameworks/native/include/
-LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libnbaio libmedia
+LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libnbaio
 LOCAL_STATIC_LIBRARIES := libmedia_helper
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)

@@ -100,15 +100,10 @@ enum {
      */
     GRALLOC_USAGE_PROTECTED             = 0x00004000,
 
-    /* bit 24 ~ bit 27 used by video playback if bit 31 is set */
-    /* mask for the HDMI middleware(MDS) usage bit-mask */
-    GRALLOC_USAGE_MDS_SESSION_ID_MASK   = 0x0F000000,
-
     /* implementation-specific private usage flags */
     GRALLOC_USAGE_PRIVATE_0             = 0x10000000,
     GRALLOC_USAGE_PRIVATE_1             = 0x20000000,
     GRALLOC_USAGE_PRIVATE_2             = 0x40000000,
-    /* used by video playback */
     GRALLOC_USAGE_PRIVATE_3             = 0x80000000,
     GRALLOC_USAGE_PRIVATE_MASK          = 0xF0000000,
 };
