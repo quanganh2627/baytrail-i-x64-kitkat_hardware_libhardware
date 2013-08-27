@@ -23,10 +23,6 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#include <cutils/log.h>
-#include <cutils/str_parms.h>
-#include <cutils/properties.h>
-
 #include <hardware/hardware.h>
 #include <system/audio.h>
 #include <hardware/audio.h>
@@ -39,6 +35,10 @@
 #include <media/AudioParameter.h>
 
 extern "C" {
+
+#include <cutils/log.h>
+#include <cutils/str_parms.h>
+#include <cutils/properties.h>
 
 namespace android {
 
@@ -77,6 +77,11 @@ struct submix_audio_device {
 
     // device lock, also used to protect access to the audio pipe
     pthread_mutex_t lock;
+    // remote bgm state - true, false
+    char *bgmstate;
+    //bgm player session
+    char* bgmsession;
+
 };
 
 struct submix_stream_out {
@@ -95,6 +100,10 @@ struct submix_stream_in {
     int64_t read_counter_frames;
 };
 
+
+/*Different audio streams across player sessions are
+  possible. hence save the stream state*/
+static char* gbgm_audio = "true";
 
 /* audio HAL functions */
 
@@ -186,18 +195,16 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 
         pthread_mutex_lock(&out->dev->lock);
 
-        MonoPipe* sink = out->dev->rsxSink.get();
-        if (sink != NULL) {
-            sink->incStrong(out);
-        } else {
-            pthread_mutex_unlock(&out->dev->lock);
-            return 0;
-        }
+        { // using the sink
+            sp<MonoPipe> sink = out->dev->rsxSink.get();
+            if (sink == 0) {
+                pthread_mutex_unlock(&out->dev->lock);
+                return 0;
+            }
 
-        ALOGI("shutdown");
-        sink->shutdown(true);
-
-        sink->decStrong(out);
+            ALOGI("shutdown");
+            sink->shutdown(true);
+        } // done using the sink
 
         pthread_mutex_unlock(&out->dev->lock);
     }
@@ -240,16 +247,16 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
 
     out->dev->output_standby = false;
 
-    MonoPipe* sink = out->dev->rsxSink.get();
-    if (sink != NULL) {
+    sp<MonoPipe> sink = out->dev->rsxSink.get();
+    if (sink != 0) {
         if (sink->isShutdown()) {
+            sink.clear();
             pthread_mutex_unlock(&out->dev->lock);
             // the pipe has already been shutdown, this buffer will be lost but we must
             //   simulate timing so we don't drain the output faster than realtime
             usleep(frames * 1000000 / out_get_sample_rate(&stream->common));
             return bytes;
         }
-        sink->incStrong(buffer);
     } else {
         pthread_mutex_unlock(&out->dev->lock);
         ALOGE("out_write without a pipe!");
@@ -260,12 +267,13 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     pthread_mutex_unlock(&out->dev->lock);
 
     written_frames = sink->write(buffer, frames);
+
     if (written_frames < 0) {
         if (written_frames == (ssize_t)NEGOTIATE) {
             ALOGE("out_write() write to pipe returned NEGOTIATE");
 
             pthread_mutex_lock(&out->dev->lock);
-            sink->decStrong(buffer);
+            sink.clear();
             pthread_mutex_unlock(&out->dev->lock);
 
             written_frames = 0;
@@ -278,9 +286,7 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     }
 
     pthread_mutex_lock(&out->dev->lock);
-
-    sink->decStrong(buffer);
-
+    sink.clear();
     pthread_mutex_unlock(&out->dev->lock);
 
     if (written_frames < 0) {
@@ -414,44 +420,42 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
     }
 
     in->read_counter_frames += frames_to_read;
-
-    MonoPipeReader* source = in->dev->rsxSource.get();
-    if (source != NULL) {
-        source->incStrong(buffer);
-    } else {
-        ALOGE("no audio pipe yet we're trying to read!");
-        pthread_mutex_unlock(&in->dev->lock);
-        usleep((bytes / frame_size) * 1000000 / in_get_sample_rate(&stream->common));
-        memset(buffer, 0, bytes);
-        return bytes;
-    }
-
-    pthread_mutex_unlock(&in->dev->lock);
-
-    // read the data from the pipe (it's non blocking)
     size_t remaining_frames = frames_to_read;
-    int attempts = 0;
-    char* buff = (char*)buffer;
-    while ((remaining_frames > 0) && (attempts < MAX_READ_ATTEMPTS)) {
-        attempts++;
-        frames_read = source->read(buff, remaining_frames, AudioBufferProvider::kInvalidPTS);
-        if (frames_read > 0) {
-            remaining_frames -= frames_read;
-            buff += frames_read * frame_size;
-            //ALOGV("  in_read (att=%d) got %ld frames, remaining=%u",
-            //      attempts, frames_read, remaining_frames);
-        } else {
-            //ALOGE("  in_read read returned %ld", frames_read);
-            usleep(READ_ATTEMPT_SLEEP_MS * 1000);
+
+    {
+        // about to read from audio source
+        sp<MonoPipeReader> source = in->dev->rsxSource.get();
+        if (source == 0) {
+            ALOGE("no audio pipe yet we're trying to read!");
+            pthread_mutex_unlock(&in->dev->lock);
+            usleep((bytes / frame_size) * 1000000 / in_get_sample_rate(&stream->common));
+            memset(buffer, 0, bytes);
+            return bytes;
         }
+
+        pthread_mutex_unlock(&in->dev->lock);
+
+        // read the data from the pipe (it's non blocking)
+        int attempts = 0;
+        char* buff = (char*)buffer;
+        while ((remaining_frames > 0) && (attempts < MAX_READ_ATTEMPTS)) {
+            attempts++;
+            frames_read = source->read(buff, remaining_frames, AudioBufferProvider::kInvalidPTS);
+            if (frames_read > 0) {
+                remaining_frames -= frames_read;
+                buff += frames_read * frame_size;
+                //ALOGV("  in_read (att=%d) got %ld frames, remaining=%u",
+                //      attempts, frames_read, remaining_frames);
+            } else {
+                //ALOGE("  in_read read returned %ld", frames_read);
+                usleep(READ_ATTEMPT_SLEEP_MS * 1000);
+            }
+        }
+        // done using the source
+        pthread_mutex_lock(&in->dev->lock);
+        source.clear();
+        pthread_mutex_unlock(&in->dev->lock);
     }
-
-    // done using the source
-    pthread_mutex_lock(&in->dev->lock);
-
-    source->decStrong(buffer);
-
-    pthread_mutex_unlock(&in->dev->lock);
 
     if (remaining_frames > 0) {
         ALOGV("  remaining_frames = %d", remaining_frames);
@@ -571,8 +575,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     // initialize pipe
     {
         ALOGV("  initializing pipe");
-        const NBAIO_Format format =
-                config->sample_rate == 48000 ? Format_SR48_C2_I16 : Format_SR44_1_C2_I16;
+        const NBAIO_Format format = Format_from_SR_C(config->sample_rate, 2);
         const NBAIO_Format offers[1] = {format};
         size_t numCounterOffers = 0;
         // creating a MonoPipe with optional blocking set to true.
@@ -613,13 +616,149 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
-    return -ENOSYS;
+    struct submix_audio_device *adev = (struct submix_audio_device *)dev;
+    char *key,*value;
+    struct str_parms *param;
+    int session = 0;
+    int keyvalue = 0;
+    char * kvp = NULL;
+    int err = 0;
+
+    if ((kvpairs == NULL) && (adev == NULL)) {
+        ALOGE("%s NUll inputs kvpairs = %s, adev = %d",__func__, kvpairs,(int)adev);
+        return err;
+    }
+
+    kvp = (char*)kvpairs;
+    ALOGV("%s entered with key-value pair %s", __func__,kvpairs);
+
+    key = strtok(kvp,"=");
+    value = strtok(NULL, "=");
+    if (key != NULL) {
+       if (strcmp(key, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE) == 0) {
+           adev->bgmstate = strdup("false");
+           if (value != NULL) {
+               if (strcmp(value, "true") == 0) {
+                  adev->bgmstate = strdup("true");
+               }
+           }
+       }
+
+       if (strcmp(key, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO) == 0) {
+           /*by default audio stream is active*/
+           gbgm_audio = strdup("true");
+           if (value != NULL) {
+               if (strcmp(value, "0") == 0) {
+                  gbgm_audio = strdup("false");
+               }
+           }
+           ALOGV("%s : audio state in BGM = %s",__func__,gbgm_audio);
+       }
+
+       if (strcmp(key, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID) == 0) {
+           if (value != NULL) {
+               adev->bgmsession = strdup(value);
+           }
+       }
+    }
+
+    ALOGV("%s exit bgmstate = %s, bgmaudio = %s bgmplayersession = %d",
+                __func__,adev->bgmstate,gbgm_audio,atoi(adev->bgmsession));
+
+    return 0;
 }
 
 static char * adev_get_parameters(const struct audio_hw_device *dev,
                                   const char *keys)
 {
-    return strdup("");;
+    struct submix_audio_device *adev = (struct submix_audio_device *)dev;
+    char value[32];
+
+    ALOGV("%s entered with keys %s", __func__,keys);
+
+    if (strcmp(keys, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE) == 0) {
+        struct str_parms *parms = str_parms_create_str(keys);
+        if(!parms) {
+           ALOGE("%s failed for bgm_state",__func__);
+           goto error_exit;
+        }
+        int ret = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE,
+                                     value, sizeof(value));
+        char *str;
+
+        str_parms_destroy(parms);
+        if (ret >= 0) {
+           ALOGV("%s adev->bgmstate %s", __func__,adev->bgmstate);
+           parms = str_parms_create_str(adev->bgmstate);
+           if(!parms) {
+              ALOGE("%s failed for bgm_state",__func__);
+              goto error_exit;
+           }
+           str = str_parms_to_str(parms);
+           str = strtok(str, "=");
+           str_parms_destroy(parms);
+           ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
+           return str;
+        }
+    }
+
+    if (strcmp(keys, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO) == 0) {
+       struct str_parms *parms = str_parms_create_str(keys);
+        if(!parms) {
+           ALOGE("%s failed for bgm_audio",__func__);
+           goto error_exit;
+        }
+       int ret = str_parms_get_str(parms, AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO,
+                                     value, sizeof(value));
+       char *str;
+
+       str_parms_destroy(parms);
+       if (ret >= 0) {
+          ALOGV("%s gbgm_audio %s", __func__,gbgm_audio);
+          parms = str_parms_create_str(gbgm_audio);
+          if(!parms) {
+             ALOGE("%s failed for bgm_state",__func__);
+             goto error_exit;
+          }
+          str = str_parms_to_str(parms);
+          str = strtok(str, "=");
+          str_parms_destroy(parms);
+          ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
+          return str;
+       }
+    }
+
+    if (strcmp(keys, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID) == 0) {
+       struct str_parms *parms = str_parms_create_str(keys);
+        if(!parms) {
+           ALOGE("%s failed for bgm_session",__func__);
+           goto error_exit;
+        }
+       int ret = str_parms_get_str(parms, AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID,
+                                     value, sizeof(value));
+       char *str;
+
+       str_parms_destroy(parms);
+       if (ret >= 0) {
+          ALOGV("%s adev->bgmsession %s", __func__,adev->bgmsession);
+          parms = str_parms_create_str(adev->bgmsession);
+          if(!parms) {
+             ALOGE("%s failed for bgm_state",__func__);
+             goto error_exit;
+          }
+          str = str_parms_to_str(parms);
+          str = strtok(str, "=");
+          str_parms_destroy(parms);
+          ALOGV("%s entered with key %s for which value is %s", __func__,keys,str);
+          return str;
+       }
+    }
+
+    ALOGV("%s exit bgmstate = %s, bgmaudio = %s bgmplayersession = %d",
+                __func__,adev->bgmstate,gbgm_audio,atoi(adev->bgmsession));
+
+error_exit:
+    return strdup("");
 }
 
 static int adev_init_check(const struct audio_hw_device *dev)
@@ -784,6 +923,9 @@ static int adev_open(const hw_module_t* module, const char* name,
     rsxadev = (submix_audio_device*) calloc(1, sizeof(struct submix_audio_device));
     if (!rsxadev)
         return -ENOMEM;
+
+    rsxadev->bgmstate = "false";
+    rsxadev->bgmsession = "0";
 
     rsxadev->device.common.tag = HARDWARE_DEVICE_TAG;
     rsxadev->device.common.version = AUDIO_DEVICE_API_VERSION_2_0;

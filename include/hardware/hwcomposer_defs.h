@@ -32,9 +32,6 @@ __BEGIN_DECLS
 
 #define HWC_MODULE_API_VERSION_0_1  HARDWARE_MODULE_API_VERSION(0, 1)
 
-#define HWC_DEVICE_API_VERSION_0_1  HARDWARE_DEVICE_API_VERSION_2(0, 1, HWC_HEADER_VERSION)
-#define HWC_DEVICE_API_VERSION_0_2  HARDWARE_DEVICE_API_VERSION_2(0, 2, HWC_HEADER_VERSION)
-#define HWC_DEVICE_API_VERSION_0_3  HARDWARE_DEVICE_API_VERSION_2(0, 3, HWC_HEADER_VERSION)
 #define HWC_DEVICE_API_VERSION_1_0  HARDWARE_DEVICE_API_VERSION_2(1, 0, HWC_HEADER_VERSION)
 #define HWC_DEVICE_API_VERSION_1_1  HARDWARE_DEVICE_API_VERSION_2(1, 1, HWC_HEADER_VERSION)
 #define HWC_DEVICE_API_VERSION_1_2  HARDWARE_DEVICE_API_VERSION_2(1, 2, HWC_HEADER_VERSION)
@@ -64,7 +61,13 @@ enum {
      * SurfaceFlinger will only honor this flag when the layer has no blending
      *
      */
-    HWC_HINT_CLEAR_FB       = 0x00000002
+    HWC_HINT_CLEAR_FB       = 0x00000002,
+
+    /*
+     * HWC set HWC_HINT_DISABLE_ANIMATION hint to indicate to SurfaceFlinger
+     * that it should bypass creating screen shot layer for rotation animation.
+     */
+    HWC_HINT_DISABLE_ANIMATION  = 0x00000004
 };
 
 /*
@@ -78,6 +81,19 @@ enum {
      * by SurfaceFlinger (just as if compositionType was set to HWC_OVERLAY).
      */
     HWC_SKIP_LAYER = 0x00000001,
+
+    /*
+     * HWC_HAS_VIDEO_SESSION_ID indicates the layer has a video session ID
+     * which is allocated by MDS(HDMI Middleware)
+     * Bit 24 ~ 27 are used too
+     */
+    HWC_HAS_VIDEO_SESSION_ID = 0x20000000,
+
+    /*
+     * HWC_TRICK_MODE indicates the layer needs to be rendered on the
+     * display device. Currently it is used on hdmi extend video mode.
+     */
+    HWC_TRICK_MODE = 0x40000000,
 };
 
 /*
@@ -132,13 +148,11 @@ enum {
 /* attributes queriable with query() */
 enum {
     /*
-     * Availability: HWC_DEVICE_API_VERSION_0_2
      * Must return 1 if the background layer is supported, 0 otherwise.
      */
     HWC_BACKGROUND_LAYER_SUPPORTED      = 0,
 
     /*
-     * Availability: HWC_DEVICE_API_VERSION_0_3
      * Returns the vsync period in nanoseconds.
      *
      * This query is not used for HWC_DEVICE_API_VERSION_1_1 and later.

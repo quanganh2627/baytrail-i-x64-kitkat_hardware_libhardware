@@ -143,7 +143,7 @@ typedef struct framebuffer_device_t {
      * Returns 0 on success or -errno on error.
      */
     int (*enableScreen)(struct framebuffer_device_t* dev, int enable);
-
+    int (*setFramecount)(int cmd, int count, int x, int y);
     void* reserved_proc[6];
 
 } framebuffer_device_t;
