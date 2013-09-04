@@ -26,8 +26,9 @@
 
 #include <cutils/bitops.h>
 
+#define USE_INTEL_LVSE
+//TODO Needs to find an alternative way of declaring in make files
 #include <system/audio.h>
-
 
 __BEGIN_DECLS
 
@@ -869,16 +870,18 @@ typedef struct effect_param_s {
 } effect_param_t;
 
 
-
+#ifdef USE_INTEL_LVSE
 /////////////////////////////////////////////////
 //      Effect library interface
 /////////////////////////////////////////////////
-
+// Effect library interface version 2.0
+#define EFFECT_LIBRARY_API_VERSION EFFECT_MAKE_API_VERSION(2,0)
+#else
 // Effect library interface version 3.0
 // Note that EffectsFactory.c only checks the major version component, so changes to the minor
 // number can only be used for fully backwards compatible changes
 #define EFFECT_LIBRARY_API_VERSION EFFECT_MAKE_API_VERSION(3,0)
-
+#endif //USE_INTEL_LVSE
 #define AUDIO_EFFECT_LIBRARY_TAG ((('A') << 24) | (('E') << 16) | (('L') << 8) | ('T'))
 
 // Every effect library must have a data structure named AUDIO_EFFECT_LIBRARY_INFO_SYM
@@ -893,7 +896,60 @@ typedef struct audio_effect_library_s {
     const char *name;
     // Author/owner/implementor of the library
     const char *implementor;
+#ifdef USE_INTEL_LVSE
 
+    ////////////////////////////////////////////////////////////////////////////////
+    //
+    //    Function:        query_num_effects
+    //
+    //    Description:    Returns the number of different effects exposed by the
+    //          library. Each effect must have a unique effect uuid (see
+    //          effect_descriptor_t). This function together with EffectQueryEffect()
+    //          is used to enumerate all effects present in the library.
+    //
+    //    Input/Output:
+    //          pNumEffects:    address where the number of effects should be returned.
+    //
+    //    Output:
+    //        returned value:    0          successful operation.
+    //                          -ENODEV     library failed to initialize
+    //                          -EINVAL     invalid pNumEffects
+    //        *pNumEffects:     updated with number of effects in library
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    int32_t (*query_num_effects)(uint32_t *pNumEffects);
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //
+    //    Function:        query_effect
+    //
+    //    Description:    Returns the descriptor of the effect engine which index is
+    //          given as argument.
+    //          See effect_descriptor_t for details on effect descriptors.
+    //          This function together with EffectQueryNumberEffects() is used to enumerate all
+    //          effects present in the library. The enumeration sequence is:
+    //              EffectQueryNumberEffects(&num_effects);
+    //              for (i = 0; i < num_effects; i++)
+    //                  EffectQueryEffect(i,...);
+    //
+    //    Input/Output:
+    //          index:          index of the effect
+    //          pDescriptor:    address where to return the effect descriptor.
+    //
+    //    Output:
+    //        returned value:    0          successful operation.
+    //                          -ENODEV     library failed to initialize
+    //                          -EINVAL     invalid pDescriptor or index
+    //                          -ENOSYS     effect list has changed since last execution of
+    //                                      EffectQueryNumberEffects()
+    //                          -ENOENT     no more effect available
+    //        *pDescriptor:     updated with the effect descriptor.
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    int32_t (*query_effect)(uint32_t index,
+                            effect_descriptor_t *pDescriptor);
+
+#endif //USE_INTEL_LVSE
     ////////////////////////////////////////////////////////////////////////////////
     //
     //    Function:        create_effect
