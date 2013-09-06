@@ -12,6 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file was modified by Dolby Laboratories, Inc. The portions of the
+ * code that are surrounded by "DOLBY..." are copyrighted and
+ * licensed separately, as follows:
+ *
+ *  (C) 2011-2013 Dolby Laboratories, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 
@@ -440,6 +459,15 @@ enum effect_command_e {
    EFFECT_CMD_OFFLOAD,              // set if effect thread is an offload one,
                                     // send the ioHandle of the effect thread
    EFFECT_CMD_FIRST_PROPRIETARY = 0x10000 // first proprietary command code
+#if defined(DOLBY_DAP_OPENSLES_PREGAIN)
+,   EFFECT_CMD_DOLBY_SET_PREGAIN    // set ds pregain
+#endif // DOLBY_DAP_OPENSLES_PREGAIN
+#if defined(DOLBY_DAP_OPENSLES_POSTGAIN)
+,   EFFECT_CMD_DOLBY_SET_POSTGAIN   // set ds postgain
+#endif // DOLBY_DAP_OPENSLES_POSTGAIN
+#ifdef DOLBY_DAP_BYPASS_SOUND_TYPES
+,   EFFECT_CMD_DOLBY_DAP_SET_BYPASS     // set ds in bypass mode.
+#endif // DOLBY_DAP_BYPASS_SOUND_TYPES
 };
 
 //==================================================================================================
