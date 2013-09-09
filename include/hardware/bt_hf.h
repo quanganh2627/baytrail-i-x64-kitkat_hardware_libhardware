@@ -66,12 +66,6 @@ typedef enum
     BTHF_CHLD_TYPE_ADDHELDTOCONF,            // Add all held calls to a conference
 } bthf_chld_type_t;
 
-typedef enum
-{
-    BTHF_WBS_CONFIG_ON = 0,
-    BTHF_WBS_CONFIG_OFF
-} bthf_wbs_config_t;
-
 /** Callback for connection state change.
  *  state will have one of the values from BtHfConnectionState
  */
@@ -145,10 +139,6 @@ typedef void (* bthf_unknown_at_cmd_callback)(char *at_string);
  */
 typedef void (* bthf_key_pressed_cmd_callback)();
 
-/** Callback for Wide Band Speech configuration
- */
-typedef void (* bthf_wbs_config_callback)(bthf_wbs_config_t state);
-
 /** BT-HF callback structure. */
 typedef struct {
     /** set to sizeof(BtHfCallbacks) */
@@ -169,7 +159,6 @@ typedef struct {
     bthf_clcc_cmd_callback          clcc_cmd_cb;
     bthf_unknown_at_cmd_callback    unknown_at_cmd_cb;
     bthf_key_pressed_cmd_callback   key_pressed_cmd_cb;
-    bthf_wbs_config_callback        wbs_config_cb;
 } bthf_callbacks_t;
 
 /** Network Status */
