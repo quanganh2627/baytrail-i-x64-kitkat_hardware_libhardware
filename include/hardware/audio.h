@@ -89,9 +89,6 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_ON "on"
 #define AUDIO_PARAMETER_VALUE_OFF "off"
 
-/* BT Wide Band Speech */
-#define AUDIO_PARAMETER_KEY_BT_WBS "bt_headset_wbs"
-
 /* TTY mode selection */
 #define AUDIO_PARAMETER_KEY_TTY_MODE "tty_mode"
 #define AUDIO_PARAMETER_VALUE_TTY_OFF "tty_off"
@@ -122,6 +119,11 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_KEY_CONTEXT_AWARENESS_STATUS "context_awareness_status"
 #define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_ON "on"
 #define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_OFF "off"
+
+/* Always Listening/VTSV */
+#define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
+#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ON "true"
+#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_OFF "false"
 
 /**
  *  audio stream parameters

@@ -230,7 +230,7 @@ static int ap_dump(const struct audio_policy *pol, int fd)
 }
 
 static bool ap_is_offload_supported(struct audio_policy *pol,
-                                   const audio_offload_info_t& config)
+                                   const audio_offload_info_t* config)
 {
     return 0;
 }
