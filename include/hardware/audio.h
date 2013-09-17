@@ -365,7 +365,7 @@ struct audio_stream_out {
      *
      * Implementation of this function is mandatory for offloaded playback.
      */
-   int (*flush)(struct audio_stream_out* stream);
+   int (*flush)(const struct audio_stream_out* stream);
 
     /**
      * Return a recent count of the number of audio frames presented to an external observer.
