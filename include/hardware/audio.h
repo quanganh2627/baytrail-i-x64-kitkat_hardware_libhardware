@@ -89,9 +89,6 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_ON "on"
 #define AUDIO_PARAMETER_VALUE_OFF "off"
 
-/* BT Wide Band Speech */
-#define AUDIO_PARAMETER_KEY_BT_WBS "bt_headset_wbs"
-
 /* TTY mode selection */
 #define AUDIO_PARAMETER_KEY_TTY_MODE "tty_mode"
 #define AUDIO_PARAMETER_VALUE_TTY_OFF "tty_off"
