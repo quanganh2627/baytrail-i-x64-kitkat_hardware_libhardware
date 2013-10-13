@@ -31,9 +31,9 @@
 #define BCU_CAMFLASH_SYSFS \
         "/sys/bus/platform/devices/crystal_cove_bcu/msic_voltage/camflash_ctrl"
 
-#define LEVEL_LOW            0
-#define LEVEL_HIGH           1
-#define MAXSYSFS_DATA_SIZ    8
+#define CAMFLASH_MIN_THROTTLE_LVL     0
+#define CAMFLASH_MAX_THROTTLE_LVL     3
+#define MAXSYSFS_DATA_SIZ             8
 
 /**
  * Generic function to write the data into sysfs interface (path which is
@@ -98,7 +98,8 @@ int byt_setaudio_throttle(uint8_t level)
 int byt_setcamera_throttle(uint8_t level)
 {
     ALOGD("BYT BCU_HAL: %s level %d\n", __func__, level);
-    if ((level == LEVEL_HIGH) || (level == LEVEL_LOW))
+    if ((level >= CAMFLASH_MIN_THROTTLE_LVL) &&
+           (level <= CAMFLASH_MAX_THROTTLE_LVL))
         return write_sysfs(BCU_CAMFLASH_SYSFS, level);
     else
         return -EINVAL;
@@ -151,7 +152,8 @@ int byt_getcamera_throttle(uint8_t *level)
     } else {
         ret = 0;
         uint8_t data = atoi(buf);
-        if ((data == LEVEL_LOW) || (data == LEVEL_HIGH))
+        if ((data >= CAMFLASH_MIN_THROTTLE_LVL) &&
+                (data <= CAMFLASH_MAX_THROTTLE_LVL))
             *level = data;
         else
             ret = -ENODATA;
