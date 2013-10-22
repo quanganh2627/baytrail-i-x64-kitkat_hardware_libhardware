@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include<time.h>
+#include <time.h>
 
 #define LOG_TAG "Intel BCUHAL"
 #include <utils/Log.h>
