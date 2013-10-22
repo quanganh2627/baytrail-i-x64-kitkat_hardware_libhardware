@@ -15,21 +15,21 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-
-LOCAL_MODULE := bcu.default
-LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-LOCAL_C_INCLUDES := hardware/libhardware
+LOCAL_MODULE := libbcu_audioif
 
 ifeq ($(BCUHAL_MRFLD), true)
-    LOCAL_SRC_FILES := \
-        bcu.c \
-        bcu_mrfld.c
+    LOCAL_SRC_FILES := bcu_audio_interface.cpp
 endif
 
+LOCAL_C_INCLUDES += \
+    hardware/libhardware \
+    frameworks/av/include/ \
+    vendor/intel/hardware/audiocomms/utilities/include/
+
 LOCAL_SHARED_LIBRARIES := liblog \
+                          libmedia \
                           libutils \
-                          libcutils \
-                          libbcu_audioif
+                          libcutils
 
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
