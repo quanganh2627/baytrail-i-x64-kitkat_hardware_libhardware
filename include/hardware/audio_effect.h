@@ -12,6 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file was modified by Dolby Laboratories, Inc. The portions of the
+ * code that are surrounded by "DOLBY..." are copyrighted and
+ * licensed separately, as follows:
+ *
+ *  (C) 2011-2013 Dolby Laboratories, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 
@@ -147,6 +166,9 @@ typedef struct effect_descriptor_s {
 //  |                           |           | 1 requires audio source updates
 //  |                           |           | 2..3 reserved
 //  +---------------------------+-----------+-----------------------------------
+//  | Effect offload supported  | 22        | 0 The effect cannot be offloaded to an audio DSP
+//  |                           |           | 1 The effect can be offloaded to an audio DSP
+//  +---------------------------+-----------+-----------------------------------
 
 // Insert mode
 #define EFFECT_FLAG_TYPE_SHIFT          0
@@ -228,6 +250,16 @@ typedef struct effect_descriptor_s {
                                           << EFFECT_FLAG_AUDIO_SOURCE_SHIFT)
 #define EFFECT_FLAG_AUDIO_SOURCE_IND    (1 << EFFECT_FLAG_AUDIO_SOURCE_SHIFT)
 #define EFFECT_FLAG_AUDIO_SOURCE_NONE   (0 << EFFECT_FLAG_AUDIO_SOURCE_SHIFT)
+
+#ifdef INTEL_MUSIC_OFFLOAD_FEATURE
+// Effect offload indication
+#define EFFECT_FLAG_OFFLOAD_SHIFT       (EFFECT_FLAG_AUDIO_SOURCE_SHIFT + \
+                                                    EFFECT_FLAG_AUDIO_SOURCE_SIZE)
+#define EFFECT_FLAG_OFFLOAD_SIZE        1
+#define EFFECT_FLAG_OFFLOAD_MASK        (((1 << EFFECT_FLAG_OFFLOAD_SIZE) -1) \
+                                          << EFFECT_FLAG_OFFLOAD_SHIFT)
+#define EFFECT_FLAG_OFFLOAD_SUPPORTED   (1 << EFFECT_FLAG_OFFLOAD_SHIFT)
+#endif
 
 #define EFFECT_MAKE_API_VERSION(M, m)  (((M)<<16) | ((m) & 0xFFFF))
 #define EFFECT_API_VERSION_MAJOR(v)    ((v)>>16)
@@ -427,6 +459,19 @@ enum effect_command_e {
    EFFECT_CMD_SET_FEATURE_CONFIG,   // set current feature configuration
    EFFECT_CMD_SET_AUDIO_SOURCE,     // set the audio source (see audio.h, audio_source_t)
    EFFECT_CMD_FIRST_PROPRIETARY = 0x10000 // first proprietary command code
+#if defined(DOLBY_DAP_OPENSLES_PREGAIN)
+,   EFFECT_CMD_DOLBY_SET_PREGAIN    // set ds pregain
+#endif // DOLBY_DAP_OPENSLES_PREGAIN
+#if defined(DOLBY_DAP_OPENSLES_POSTGAIN)
+,   EFFECT_CMD_DOLBY_SET_POSTGAIN   // set ds postgain
+#endif // DOLBY_DAP_OPENSLES_POSTGAIN
+#ifdef DOLBY_DAP_BYPASS_SOUND_TYPES
+,   EFFECT_CMD_DOLBY_DAP_SET_BYPASS     // set ds in bypass mode.
+#endif // DOLBY_DAP_BYPASS_SOUND_TYPES
+#ifdef INTEL_MUSIC_OFFLOAD_FEATURE
+   ,EFFECT_CMD_OFFLOAD              // set if effect thread is an offload one,
+                                    // send the ioHandle of the effect thread
+#endif
 };
 
 //==================================================================================================
@@ -732,6 +777,22 @@ enum effect_command_e {
 //  size: 0
 //  data: N/A
 //==================================================================================================
+#ifdef INTEL_MUSIC_OFFLOAD_FEATURE
+// command: EFFECT_CMD_OFFLOAD
+//--------------------------------------------------------------------------------------------------
+// description:
+//  1.indicate if the playback thread the effect is attached to is offloaded or not
+//  2.update the io handle of the playback thread the effect is attached to
+//--------------------------------------------------------------------------------------------------
+// command format:
+//  size: sizeof(effect_offload_param_t)
+//  data: effect_offload_param_t
+//--------------------------------------------------------------------------------------------------
+// reply format:
+//  size: sizeof(uint32_t)
+//  data: uint32_t
+//--------------------------------------------------------------------------------------------------
+#endif
 // command: EFFECT_CMD_FIRST_PROPRIETARY
 //--------------------------------------------------------------------------------------------------
 // description:
@@ -867,8 +928,13 @@ typedef struct effect_param_s {
     uint32_t    vsize;      // Value size
     char        data[];     // Start of Parameter + Value data
 } effect_param_t;
-
-
+#ifdef INTEL_MUSIC_OFFLOAD_FEATURE
+// structure used by EFFECT_CMD_OFFLOAD command
+typedef struct effect_offload_param_s {
+    bool isOffload;         // true if the playback thread the effect is attached to is offloaded
+    int ioHandle;           // io handle of the playback thread the effect is attached to
+} effect_offload_param_t;
+#endif
 
 /////////////////////////////////////////////////
 //      Effect library interface
