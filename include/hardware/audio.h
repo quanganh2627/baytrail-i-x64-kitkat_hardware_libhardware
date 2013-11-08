@@ -109,6 +109,10 @@ __BEGIN_DECLS
 
 /* Stream Flags */
 #define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
+/* Remote BGM state */
+#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID "bgm_session"
 
 /* Always Listening/VTSV */
 #define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
