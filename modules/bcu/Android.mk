@@ -26,6 +26,12 @@ ifeq ($(BCUHAL_MRFLD), true)
         bcu_mrfld.c
 endif
 
+ifeq ($(BCUHAL_BYT), true)
+    LOCAL_SRC_FILES := \
+        bcu.c \
+        bcu_byt.c
+endif
+
 LOCAL_SHARED_LIBRARIES := liblog \
                           libutils \
                           libcutils \
