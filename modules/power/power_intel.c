@@ -218,6 +218,7 @@ static void intel_power_init(struct power_module *module)
 
 static void intel_power_set_interactive(struct power_module *module, int on)
 {
+#ifdef EARLY_SUSPEND_SUPPORT
     struct dirent **device_list = NULL;
     int entries = 0;
 
@@ -226,6 +227,7 @@ static void intel_power_set_interactive(struct power_module *module, int on)
     handle_device_suspend(device_list, entries, on);
 
     free_dir_list(device_list, entries);
+#endif
 }
 
 static void intel_power_hint(struct power_module *module, power_hint_t hint,
