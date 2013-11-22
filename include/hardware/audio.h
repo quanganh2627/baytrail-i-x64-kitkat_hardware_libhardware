@@ -67,6 +67,7 @@ __BEGIN_DECLS
 #define AUDIO_HARDWARE_MODULE_ID_A2DP "a2dp"
 #define AUDIO_HARDWARE_MODULE_ID_USB "usb"
 #define AUDIO_HARDWARE_MODULE_ID_REMOTE_SUBMIX "r_submix"
+#define AUDIO_HARDWARE_MODULE_ID_CODEC_OFFLOAD "codec_offload"
 
 /**************************************/
 
@@ -77,6 +78,11 @@ __BEGIN_DECLS
 /**
  *  audio device parameters
  */
+
+/* BT chip state */
+#define AUDIO_PARAMETER_KEY_BLUETOOTH_STATE "bluetooth_enabled"
+#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_ON "true"
+#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_OFF "false"
 
 /* BT SCO Noise Reduction + Echo Cancellation parameters */
 #define AUDIO_PARAMETER_KEY_BT_NREC "bt_headset_nrec"
@@ -90,11 +96,43 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_TTY_HCO "tty_hco"
 #define AUDIO_PARAMETER_VALUE_TTY_FULL "tty_full"
 
+/* HAC device selection */
+#define AUDIO_PARAMETER_KEY_HAC_SETTING "HACSetting"
+#define AUDIO_PARAMETER_VALUE_HAC_ON "ON"
+#define AUDIO_PARAMETER_VALUE_HAC_OFF "OFF"
+
 /* A2DP sink address set by framework */
 #define AUDIO_PARAMETER_A2DP_SINK_ADDRESS "a2dp_sink_address"
 
 /* Screen state */
 #define AUDIO_PARAMETER_KEY_SCREEN_STATE "screen_state"
+
+/* Stream Flags */
+#define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
+/* Remote BGM state */
+#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID "bgm_session"
+
+/* Always Listening/VTSV */
+#define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
+#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ON "true"
+#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_OFF "false"
+
+/* Context awareness */
+#define AUDIO_PARAMETER_KEY_CONTEXT_AWARENESS_STATUS "context_awareness_status"
+#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_ON "on"
+#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_OFF "off"
+
+/* No Non-linear Post processing */
+#define AUDIO_PARAMETER_KEY_BYPASS_NON_LINEAR_POSTPROCESSING_SETTING "BypassNonLinearPp"
+#define AUDIO_PARAMETER_VALUE_BYPASS_NON_LINEAR_PP_ON "on"
+#define AUDIO_PARAMETER_VALUE_BYPASS_NON_LINEAR_PP_OFF "off"
+
+/* No Linear Post processing */
+#define AUDIO_PARAMETER_KEY_BYPASS_LINEAR_POSTPROCESSING_SETTING "BypassLinearPp"
+#define AUDIO_PARAMETER_VALUE_BYPASS_LINEAR_PP_ON "on"
+#define AUDIO_PARAMETER_VALUE_BYPASS_LINEAR_PP_OFF "off"
 
 /**
  *  audio stream parameters
@@ -117,16 +155,35 @@ __BEGIN_DECLS
  * "sup_sampling_rates=44100|48000" */
 #define AUDIO_PARAMETER_STREAM_SUP_SAMPLING_RATES "sup_sampling_rates"
 
+/**
+ * audio codec parameters
+ */
+
+#define AUDIO_OFFLOAD_CODEC_PARAMS "music_offload_codec_param"
+#define AUDIO_OFFLOAD_CODEC_BIT_PER_SAMPLE "music_offload_bit_per_sample"
+#define AUDIO_OFFLOAD_CODEC_BIT_RATE "music_offload_bit_rate"
+#define AUDIO_OFFLOAD_CODEC_AVG_BIT_RATE "music_offload_avg_bit_rate"
+#define AUDIO_OFFLOAD_CODEC_ID "music_offload_codec_id"
+#define AUDIO_OFFLOAD_CODEC_BLOCK_ALIGN "music_offload_block_align"
+#define AUDIO_OFFLOAD_CODEC_SAMPLE_RATE "music_offload_sample_rate"
+#define AUDIO_OFFLOAD_CODEC_ENCODE_OPTION "music_offload_encode_option"
+#define AUDIO_OFFLOAD_CODEC_NUM_CHANNEL  "music_offload_num_channels"
+#define AUDIO_OFFLOAD_CODEC_DOWN_SAMPLING  "music_offload_down_sampling"
+#define AUDIO_OFFLOAD_CODEC_DELAY_SAMPLES  "delay_samples"
+#define AUDIO_OFFLOAD_CODEC_PADDING_SAMPLES  "padding_samples"
 
 /**************************************/
 
-/* common audio stream configuration parameters */
+/* common audio stream configuration parameters
+ * You should memset() the entire structure to zero before use to
+ * ensure forward compatibility
+ */
 struct audio_config {
     uint32_t sample_rate;
     audio_channel_mask_t channel_mask;
     audio_format_t  format;
+    audio_offload_info_t offload_info;
 };
-
 typedef struct audio_config audio_config_t;
 
 /* common audio stream parameters and operations */
@@ -213,6 +270,22 @@ struct audio_stream {
 };
 typedef struct audio_stream audio_stream_t;
 
+/* type of asynchronous write callback events. Mutually exclusive */
+typedef enum {
+    STREAM_CBK_EVENT_WRITE_READY, /* non blocking write completed */
+    STREAM_CBK_EVENT_DRAIN_READY  /* drain completed */
+} stream_callback_event_t;
+
+typedef int (*stream_callback_t)(stream_callback_event_t event, void *param, void *cookie);
+
+/* type of drain requested to audio_stream_out->drain(). Mutually exclusive */
+typedef enum {
+    AUDIO_DRAIN_ALL,            /* drain() returns when all data has been played */
+    AUDIO_DRAIN_EARLY_NOTIFY    /* drain() returns a short time before all data
+                                   from the current track has been played to
+                                   give time for gapless track switch */
+} audio_drain_type_t;
+
 /**
  * audio_stream_out is the abstraction interface for the audio output hardware.
  *
@@ -242,6 +315,13 @@ struct audio_stream_out {
      * negative status_t. If at least one frame was written successfully prior to the error,
      * it is suggested that the driver return that successful (short) byte count
      * and then return an error in the subsequent call.
+     *
+     * If set_callback() has previously been called to enable non-blocking mode
+     * the write() is not allowed to block. It must write only the number of
+     * bytes that currently fit in the driver/hardware buffer and then return
+     * this byte count. If this is less than the requested write size the
+     * callback function must be called when more space is available in the
+     * driver/hardware buffer.
      */
     ssize_t (*write)(struct audio_stream_out *stream, const void* buffer,
                      size_t bytes);
@@ -258,6 +338,80 @@ struct audio_stream_out {
      */
     int (*get_next_write_timestamp)(const struct audio_stream_out *stream,
                                     int64_t *timestamp);
+
+    /**
+     * set the callback function for notifying completion of non-blocking
+     * write and drain.
+     * Calling this function implies that all future write() and drain()
+     * must be non-blocking and use the callback to signal completion.
+     */
+    int (*set_callback)(struct audio_stream_out *stream,
+            stream_callback_t callback, void *cookie);
+
+    /**
+     * Notifies to the audio driver to stop playback however the queued buffers are
+     * retained by the hardware. Useful for implementing pause/resume. Empty implementation
+     * if not supported however should be implemented for hardware with non-trivial
+     * latency. In the pause state audio hardware could still be using power. User may
+     * consider calling suspend after a timeout.
+     *
+     * Implementation of this function is mandatory for offloaded playback.
+     */
+    int (*pause)(struct audio_stream_out* stream);
+
+    /**
+     * Notifies to the audio driver to resume playback following a pause.
+     * Returns error if called without matching pause.
+     *
+     * Implementation of this function is mandatory for offloaded playback.
+     */
+    int (*resume)(struct audio_stream_out* stream);
+
+    /**
+     * Requests notification when data buffered by the driver/hardware has
+     * been played. If set_callback() has previously been called to enable
+     * non-blocking mode, the drain() must not block, instead it should return
+     * quickly and completion of the drain is notified through the callback.
+     * If set_callback() has not been called, the drain() must block until
+     * completion.
+     * If type==AUDIO_DRAIN_ALL, the drain completes when all previously written
+     * data has been played.
+     * If type==AUDIO_DRAIN_EARLY_NOTIFY, the drain completes shortly before all
+     * data for the current track has played to allow time for the framework
+     * to perform a gapless track switch.
+     *
+     * Drain must return immediately on stop() and flush() call
+     *
+     * Implementation of this function is mandatory for offloaded playback.
+     */
+    int (*drain)(struct audio_stream_out* stream, audio_drain_type_t type );
+
+    /**
+     * Notifies to the audio driver to flush the queued data. Stream must already
+     * be paused before calling flush().
+     *
+     * Implementation of this function is mandatory for offloaded playback.
+     */
+   int (*flush)(const struct audio_stream_out* stream);
+
+    /**
+     * Return a recent count of the number of audio frames presented to an external observer.
+     * This excludes frames which have been written but are still in the pipeline.
+     * The count is not reset to zero when output enters standby.
+     * Also returns the value of CLOCK_MONOTONIC as of this presentation count.
+     * The returned count is expected to be 'recent',
+     * but does not need to be the most recent possible value.
+     * However, the associated time should correspond to whatever count is returned.
+     * Example:  assume that N+M frames have been presented, where M is a 'small' number.
+     * Then it is permissible to return N instead of N+M,
+     * and the timestamp should correspond to N rather than N+M.
+     * The terms 'recent' and 'small' are not defined.
+     * They reflect the quality of the implementation.
+     *
+     * 3.0 and higher only.
+     */
+    int (*get_presentation_position)(const struct audio_stream_out *stream,
+                               uint64_t *frames, struct timespec *timestamp);
 
 };
 typedef struct audio_stream_out audio_stream_out_t;
@@ -296,18 +450,14 @@ typedef struct audio_stream_in audio_stream_in_t;
 static inline size_t audio_stream_frame_size(const struct audio_stream *s)
 {
     size_t chan_samp_sz;
+    audio_format_t format = s->get_format(s);
 
-    switch (s->get_format(s)) {
-    case AUDIO_FORMAT_PCM_16_BIT:
-        chan_samp_sz = sizeof(int16_t);
-        break;
-    case AUDIO_FORMAT_PCM_8_BIT:
-    default:
-        chan_samp_sz = sizeof(int8_t);
-        break;
+    if (audio_is_linear_pcm(format)) {
+        chan_samp_sz = audio_bytes_per_sample(format);
+        return popcount(s->get_channels(s)) * chan_samp_sz;
     }
 
-    return popcount(s->get_channels(s)) * chan_samp_sz;
+    return sizeof(int8_t);
 }
 
 
