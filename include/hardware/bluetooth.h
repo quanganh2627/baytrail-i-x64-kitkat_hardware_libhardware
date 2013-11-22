@@ -451,9 +451,6 @@ typedef struct {
     /* opcode MUST be one of: LE_Receiver_Test, LE_Transmitter_Test, LE_Test_End */
     int (*le_test_mode)(uint16_t opcode, uint8_t *buf, uint8_t len);
 
-    /** Re-configure AFH Channel Classification used for coexistence purposes */
-    int (*set_channel_classification)(uint8_t *bt_channel, uint8_t *le_channel);
-
 } bt_interface_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
