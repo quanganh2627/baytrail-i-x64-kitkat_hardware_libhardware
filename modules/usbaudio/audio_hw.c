@@ -33,6 +33,19 @@
 
 #include <tinyalsa/asoundlib.h>
 
+#include <dirent.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <sound/asound.h>
+#include <unistd.h>
+
+#define PCM_DEV_STR "pcm"
+#define USB_AUDIO_STR "USB Audio"
+#define MAX_PATH_LEN 30
+
+#define NBR_RETRIES 5
+#define RETRY_WAIT_USEC 20000
+
 struct pcm_config pcm_config = {
     .channels = 2,
     .rate = 44100,
@@ -264,6 +277,81 @@ static int out_get_next_write_timestamp(const struct audio_stream_out *stream,
     return -EINVAL;
 }
 
+/*
+ * Examines a pcm-device file to see if its a USB Audio device and
+ * returns its card-number. If no match, returns -1.
+ */
+static int first_valid_usb_card(char *pcm_name)
+{
+    int fd;
+    char pcm_dev_path[MAX_PATH_LEN];
+    struct snd_pcm_info info;
+
+    ALOGV("%s enter",__func__);
+
+    /* If pcm out then filename must end with 0p */
+    if (!strstr(pcm_name, "0p")) {
+        ALOGV("%s exit",__func__);
+        return -1;
+    }
+
+    snprintf(pcm_dev_path, sizeof(pcm_dev_path), "/dev/snd/%s", pcm_name);
+    fd = open(pcm_dev_path, O_RDONLY);
+
+    if (fd != -1) {
+        if (!(ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info))) {
+            if (strstr(info.id, USB_AUDIO_STR)) {
+                close(fd);
+                ALOGV("%s exit",__func__);
+                return info.card;
+            }
+        } else {
+            ALOGE("ioctl failed for file: %s", pcm_dev_path);
+        }
+
+        close(fd);
+    }
+
+    ALOGV("%s exit",__func__);
+    return -1;
+}
+
+/*
+ * Returns the number of the first valid USB Audio card
+ * If none is found, returns -1.
+ */
+static int get_first_usb_card()
+{
+    DIR *dir;
+    struct dirent *de = NULL;
+    int card_nr;
+
+    ALOGV("%s enter",__func__);
+
+    dir = opendir("/dev/snd");
+    if (dir == NULL) {
+        ALOGE("Could not open directory /dev/snd");
+        ALOGV("%s exit",__func__);
+        return -1;
+    }
+
+    while ((de = readdir(dir))) {
+        if (strncmp(de->d_name, PCM_DEV_STR, sizeof(PCM_DEV_STR) - 1) == 0) {
+            if ((card_nr = first_valid_usb_card(de->d_name)) != -1) {
+                closedir(dir);
+                ALOGV("%s exit",__func__);
+                return card_nr;
+            }
+        }
+    }
+
+    closedir(dir);
+    ALOGW("No usb-card found in /dev/snd");
+    ALOGV("%s exit",__func__);
+    return -1;
+}
+
+
 static int adev_open_output_stream(struct audio_hw_device *dev,
                                    audio_io_handle_t handle,
                                    audio_devices_t devices,
@@ -274,6 +362,8 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     struct audio_device *adev = (struct audio_device *)dev;
     struct stream_out *out;
     int ret;
+    int try_time;
+
     ALOGV("%s enter",__func__);
 
     out = (struct stream_out *)calloc(1, sizeof(struct stream_out));
@@ -306,8 +396,18 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
 
     out->standby = true;
 
-    adev->card = -1;
-    adev->device = -1;
+    /*
+     * Expecting an USB-Audio card to be present, but the dev filesystem
+     * might not have presented it yet. In that case do some retries.
+     */
+    for (try_time = 0; try_time < NBR_RETRIES; try_time++) {
+        adev->card = get_first_usb_card();
+        if (adev->card == -1)
+            usleep(RETRY_WAIT_USEC);
+        else
+            break;
+    }
+    adev->device = 0;
 
     *stream_out = &out->stream;
     ALOGV("%s exit",__func__);
