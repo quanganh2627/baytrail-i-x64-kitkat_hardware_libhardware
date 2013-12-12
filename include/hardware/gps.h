@@ -196,6 +196,7 @@ typedef uint16_t AGpsStatusValue;
 #define AGPS_REF_LOCATION_TYPE_GSM_CELLID   1
 #define AGPS_REF_LOCATION_TYPE_UMTS_CELLID  2
 #define AGPS_REF_LOCATION_TYPE_MAC          3
+#define AGPS_REF_LOCATION_TYPE_LTE_CELLID   4
 
 /** Network types for update_network_state "type" parameter */
 #define AGPS_RIL_NETWORK_TYPE_MOBILE        0
@@ -309,14 +310,16 @@ typedef struct {
     uint32_t    used_in_fix_mask;
 } GpsSvStatus;
 
-/* 2G and 3G */
+/* 2G, 3G and 4G */
 /* In 3G lac is discarded */
+/* In 2G and 3G psc is discarded */
 typedef struct {
     uint16_t type;
     uint16_t mcc;
     uint16_t mnc;
     uint16_t lac;
     uint32_t cid;
+    uint16_t psc;
 } AGpsRefLocationCellID;
 
 typedef struct {
