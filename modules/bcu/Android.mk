@@ -1,4 +1,4 @@
-# Copyright (C) 2012 The Android Open Source Project
+# Copyright (C) 2013 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +16,26 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := audio.r_submix.default
+LOCAL_MODULE := bcu.default
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-LOCAL_SRC_FILES := \
-	audio_hw.cpp
-LOCAL_C_INCLUDES += \
-	frameworks/av/include/ \
-	frameworks/native/include/
-LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libnbaio libmedia
-LOCAL_STATIC_LIBRARIES := libmedia_helper
+LOCAL_C_INCLUDES := hardware/libhardware
+
+ifeq ($(BCUHAL_MRFLD), true)
+    LOCAL_SRC_FILES := \
+        bcu.c \
+        bcu_mrfld.c
+endif
+
+ifeq ($(BCUHAL_BYT), true)
+    LOCAL_SRC_FILES := \
+        bcu.c \
+        bcu_byt.c
+endif
+
+LOCAL_SHARED_LIBRARIES := liblog \
+                          libutils \
+                          libcutils \
+                          libbcu_audioif
+
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_SHARED_LIBRARY)
-

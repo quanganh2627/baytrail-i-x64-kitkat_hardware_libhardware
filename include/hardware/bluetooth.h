@@ -455,6 +455,28 @@ typedef struct {
     int (*config_hci_snoop_log)(uint8_t enable);
 } bt_interface_t;
 
+/** Represents the intel specific Bluetooth DM interface. */
+typedef struct {
+    /** set to sizeof(bt_interface_intel_t) */
+    size_t size;
+
+    /** Re-configure AFH Channel Classification used for coexistence purposes */
+    int (*set_channel_classification)(uint8_t *bt_channel, uint8_t *le_channel);
+
+    /** Set MWS channel Parameters used for coexistence purposes */
+    int (*set_mws_channel_parameters)(uint8_t enable,
+                                      uint16_t rx_center_freq,
+                                      uint16_t tx_center_freq,
+                                      uint16_t rx_channel_bandwidth,
+                                      uint16_t tx_channel_bandwidth,
+                                      uint8_t channel_type);
+
+    /** Set MWS transport Layer used for coexistence purposes */
+    int (*set_mws_transport_layer)(uint8_t transport_layer,
+                                   uint32_t to_baud_rate,
+                                   uint32_t from_baud_rate);
+} bt_interface_intel_t;
+
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
   *       connection management. Also need to add APIs for configuring
   *       properties of remote bonded devices such as name, UUID etc. */
@@ -462,6 +484,7 @@ typedef struct {
 typedef struct {
     struct hw_device_t common;
     const bt_interface_t* (*get_bluetooth_interface)();
+    const bt_interface_intel_t* (*get_bluetooth_interface_intel)();
 } bluetooth_device_t;
 
 typedef bluetooth_device_t bluetooth_module_t;

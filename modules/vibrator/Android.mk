@@ -16,15 +16,15 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := audio.r_submix.default
+# HAL module implemenation stored in
+# hw/<OVERLAY_HARDWARE_MODULE_ID>.<ro.product.board>.so
+
+LOCAL_MODULE := vibrator.default
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-LOCAL_SRC_FILES := \
-	audio_hw.cpp
-LOCAL_C_INCLUDES += \
-	frameworks/av/include/ \
-	frameworks/native/include/
-LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libnbaio libmedia
-LOCAL_STATIC_LIBRARIES := libmedia_helper
+LOCAL_C_INCLUDES := hardware/libhardware_legacy
+LOCAL_SRC_FILES := vibrator.c
+LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_TAGS := optional
+
 include $(BUILD_SHARED_LIBRARY)
 
