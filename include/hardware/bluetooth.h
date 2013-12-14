@@ -453,9 +453,6 @@ typedef struct {
 
     /* enable or disable bluetooth HCI snoop log */
     int (*config_hci_snoop_log)(uint8_t enable);
-
-    /** Re-configure AFH Channel Classification used for coexistence purposes */
-    int (*set_channel_classification)(uint8_t *bt_channel, uint8_t *le_channel);
 } bt_interface_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and

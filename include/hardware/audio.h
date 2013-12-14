@@ -79,11 +79,6 @@ __BEGIN_DECLS
  *  audio device parameters
  */
 
-/* BT chip state */
-#define AUDIO_PARAMETER_KEY_BLUETOOTH_STATE "bluetooth_enabled"
-#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_ON "true"
-#define AUDIO_PARAMETER_VALUE_BLUETOOTH_STATE_OFF "false"
-
 /* BT SCO Noise Reduction + Echo Cancellation parameters */
 #define AUDIO_PARAMETER_KEY_BT_NREC "bt_headset_nrec"
 #define AUDIO_PARAMETER_VALUE_ON "on"
@@ -96,43 +91,11 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_TTY_HCO "tty_hco"
 #define AUDIO_PARAMETER_VALUE_TTY_FULL "tty_full"
 
-/* HAC device selection */
-#define AUDIO_PARAMETER_KEY_HAC_SETTING "HACSetting"
-#define AUDIO_PARAMETER_VALUE_HAC_ON "ON"
-#define AUDIO_PARAMETER_VALUE_HAC_OFF "OFF"
-
 /* A2DP sink address set by framework */
 #define AUDIO_PARAMETER_A2DP_SINK_ADDRESS "a2dp_sink_address"
 
 /* Screen state */
 #define AUDIO_PARAMETER_KEY_SCREEN_STATE "screen_state"
-
-/* Stream Flags */
-#define AUDIO_PARAMETER_KEY_STREAM_FLAGS "stream_flags"
-/* Remote BGM state */
-#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
-#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
-#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID "bgm_session"
-
-/* Always Listening/VTSV */
-#define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ON "true"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_OFF "false"
-
-/* Context awareness */
-#define AUDIO_PARAMETER_KEY_CONTEXT_AWARENESS_STATUS "context_awareness_status"
-#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_ON "on"
-#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_OFF "off"
-
-/* No Non-linear Post processing */
-#define AUDIO_PARAMETER_KEY_BYPASS_NON_LINEAR_POSTPROCESSING_SETTING "BypassNonLinearPp"
-#define AUDIO_PARAMETER_VALUE_BYPASS_NON_LINEAR_PP_ON "on"
-#define AUDIO_PARAMETER_VALUE_BYPASS_NON_LINEAR_PP_OFF "off"
-
-/* No Linear Post processing */
-#define AUDIO_PARAMETER_KEY_BYPASS_LINEAR_POSTPROCESSING_SETTING "BypassLinearPp"
-#define AUDIO_PARAMETER_VALUE_BYPASS_LINEAR_PP_ON "on"
-#define AUDIO_PARAMETER_VALUE_BYPASS_LINEAR_PP_OFF "off"
 
 /**
  *  audio stream parameters
@@ -392,7 +355,7 @@ struct audio_stream_out {
      *
      * Implementation of this function is mandatory for offloaded playback.
      */
-   int (*flush)(const struct audio_stream_out* stream);
+   int (*flush)(struct audio_stream_out* stream);
 
     /**
      * Return a recent count of the number of audio frames presented to an external observer.
