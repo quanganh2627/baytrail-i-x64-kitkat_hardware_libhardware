@@ -50,6 +50,16 @@ __BEGIN_DECLS
 #define BT_PROFILE_GATT_ID "gatt"
 #define BT_PROFILE_AV_RC_ID "avrcp"
 
+#ifdef VERIFIER
+#define BT_PROFILE_BNEP_VERIFIER_ID "verify_bnep"
+#define BT_PROFILE_AVDTP_VERIFIER_ID "verify_avdtp"
+#endif
+#ifdef TESTER
+#define BT_PROFILE_BNEP_TESTER_ID "test_bnep"
+#define BT_PROFILE_AVDTP_TESTER_ID "test_avdtp"
+#define BT_PROFILE_L2CAP_TESTER_ID "test_l2cap"
+#endif
+
 /** Bluetooth Address */
 typedef struct {
     uint8_t address[6];
