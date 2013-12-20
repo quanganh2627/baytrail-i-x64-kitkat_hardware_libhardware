@@ -48,12 +48,12 @@ static int write_sysfs(char const *path, uint8_t data)
     char buf[80];
     int fd = open(path, O_WRONLY);
     if (fd >= 0) {
-        char buffer[6] = {'\0'};
-        int bytes = sprintf(buffer, "%d\n", data);
+        char buffer[MAXSYSFS_DATA_SIZ] = {'\0'};
+        int bytes = snprintf(buffer, sizeof(buffer), "%d\n", data);
         int amt = write(fd, buffer, bytes);
         if (amt < 0) {
             strerror_r(errno, buf, sizeof(buf));
-            ALOGE("MRFL BCU_HAL: Error writing to %s: %s\n", path, buf);
+            ALOGE("MRFL BCU_HAL: Error writing into %s: %s\n", path, buf);
         }
         close(fd);
         return amt == -1 ? -errno : 0;
