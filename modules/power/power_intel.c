@@ -17,8 +17,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <sys/param.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include<time.h>
+#include <limits.h>
+
 
 #define LOG_TAG "Intel PowerHAL"
 #include <utils/Log.h>
@@ -30,6 +35,11 @@
 #define BOOST_PULSE_SYSFS    "/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
 #define TOUCHBOOST_PULSE_SYSFS    "/sys/devices/system/cpu/cpufreq/interactive/touchboostpulse"
 #define TOUCHBOOST_SYSFS    "/sys/devices/system/cpu/cpufreq/interactive/touchboost_freq"
+
+#define EARLY_SUSPEND_SYSFS_DIR    "/sys/power/early_suspend"
+#define EARLY_SUSPEND_SYSFS_NAME   "early_suspend"
+#define EARLY_SUSPEND_OFF          "0"
+#define EARLY_SUSPEND_ON           "1"
 
 /*
  * This parameter is to identify continuous touch/scroll events.
@@ -106,6 +116,88 @@ static int sysfs_read(char *path, char *s, int num_bytes)
     return ret;
 }
 
+static int filter_non_suspend(const struct dirent *d)
+{
+    return !(strcmp(d->d_name, EARLY_SUSPEND_SYSFS_NAME));
+}
+
+static void free_dir_list(struct dirent **dir_list, int entries)
+{
+    int index;
+
+    for (index = 0; index < entries; index++)
+        free(dir_list[index]);
+
+    free(dir_list);
+}
+
+static int select_suspend_dir(const struct dirent *d)
+{
+    struct dirent **device_list = NULL;
+    int i, entries = 0;
+    char path[PATH_MAX];
+
+    /* filter non dir except symlink*/
+    if (!((d->d_type & DT_DIR) || (d->d_type & DT_LNK)))
+        return 0;
+
+    /* filter dot dir */
+    if (!(strcmp(d->d_name, "..") && strcmp(d->d_name, ".")))
+        return 0;
+
+    snprintf(path, PATH_MAX, "%s/%s", EARLY_SUSPEND_SYSFS_DIR, d->d_name);
+
+    /* scan every dir and look for suspend file */
+    entries = scandir(path, &device_list, filter_non_suspend, NULL);
+
+    /* free device_list */
+    free_dir_list(device_list, entries);
+
+    /* return 0 for non suspend dir*/
+    if (entries < 0)
+        return 0;
+
+    return 1;
+}
+
+static int get_early_suspend_devices(struct dirent ***dir_list)
+{
+    struct dirent **device_list = NULL;
+    int i, entries = 0;
+
+    entries = scandir(EARLY_SUSPEND_SYSFS_DIR, &device_list,
+                    select_suspend_dir, NULL);
+
+    if ( entries < 0 ) {
+        ALOGE("Error scanning early suspend sysfs\n");
+        goto out;
+    }
+
+    *dir_list = device_list;
+
+out:
+    return entries;
+}
+
+static void handle_device_suspend(struct dirent **device_list,
+                    int entries, int on)
+{
+    int i;
+    char path[PATH_MAX];
+
+    for (i = 0; i < entries; i++) {
+        snprintf(path, PATH_MAX, "%s/%s/%s",
+                EARLY_SUSPEND_SYSFS_DIR,
+                device_list[i]->d_name,
+                EARLY_SUSPEND_SYSFS_NAME);
+
+        if (on)
+            sysfs_write(path, EARLY_SUSPEND_OFF);
+        else
+            sysfs_write(path, EARLY_SUSPEND_ON);
+    }
+}
+
 static void intel_power_init(struct power_module *module)
 {
     ALOGW("**Intel Power HAL initialisation**\n");
@@ -126,6 +218,16 @@ static void intel_power_init(struct power_module *module)
 
 static void intel_power_set_interactive(struct power_module *module, int on)
 {
+#ifdef EARLY_SUSPEND_SUPPORT
+    struct dirent **device_list = NULL;
+    int entries = 0;
+
+    entries = get_early_suspend_devices(&device_list);
+
+    handle_device_suspend(device_list, entries, on);
+
+    free_dir_list(device_list, entries);
+#endif
 }
 
 static void intel_power_hint(struct power_module *module, power_hint_t hint,
