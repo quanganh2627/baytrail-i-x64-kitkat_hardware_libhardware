@@ -121,7 +121,18 @@ static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
                 0, 0, m->info.xres, m->info.yres,
                 &buffer_vaddr);
 
-        memcpy(fb_vaddr, buffer_vaddr, m->finfo.line_length * m->info.yres);
+        if (m->info.blue.offset > m->info.red.offset) {
+            // Framebuffer has swapped red and blue channels
+            unsigned char* ucfb_vaddr = (unsigned char*)fb_vaddr;
+            unsigned char* ucbuffer_vaddr = (unsigned char*)buffer_vaddr;
+            for (unsigned int idx = 0 ; idx < (m->finfo.line_length * m->info.yres); idx += 4) {
+                ucfb_vaddr[idx    ] = ucbuffer_vaddr[idx + 2];
+                ucfb_vaddr[idx + 1] = ucbuffer_vaddr[idx + 1];
+                ucfb_vaddr[idx + 2] = ucbuffer_vaddr[idx    ];
+                ucfb_vaddr[idx + 3] = ucbuffer_vaddr[idx + 3];
+            }
+        } else
+            memcpy(fb_vaddr, buffer_vaddr, m->finfo.line_length * m->info.yres);
         
         m->base.unlock(&m->base, buffer); 
         m->base.unlock(&m->base, m->framebuffer); 
@@ -216,6 +227,30 @@ int mapFrameBufferLocked(struct private_module_t* module)
         // default to 160 dpi
         info.width  = ((info.xres * 25.4f)/160.0f + 0.5f);
         info.height = ((info.yres * 25.4f)/160.0f + 0.5f);
+    }
+
+    /* Swap red and blue channels for framebuffer expecting BGR
+     * instead of RGB, if not already done so. */
+    if (info.blue.offset <= info.red.offset) {
+        int need_rb_swapped = 0;
+
+        /* Intel Graphics (using i915) is in BGR. */
+        if (strncmp(finfo.id, "inteldrmfb", sizeof(finfo.id)) == 0) {
+            need_rb_swapped = 1;
+        }
+#if defined(FORCE_EFIFB_PIXEL_FORMAT_BGRA)
+        /* Force EFI FB to use BGR as kernel always reports RGB. */
+        else if (strncmp(finfo.id, "EFI VGA", sizeof(finfo.id)) == 0) {
+            need_rb_swapped = 1;
+        }
+#endif
+
+        if (need_rb_swapped) {
+            ALOGI("framebuffer expected BGR instead of RGB.");
+            i = info.blue.offset;
+            info.blue.offset = info.red.offset;
+            info.red.offset = i;
+        }
     }
 
     float xdpi = (info.xres * 25.4f) / info.width;
