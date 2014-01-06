@@ -120,6 +120,9 @@ enum {
      */
     GRALLOC_USAGE_PROTECTED             = 0x00004000,
 
+    /* buffer will be used for FBDC*/
+    GRALLOC_USAGE_COMPRESSION           = 0x00008000,
+
     /* bit 24 ~ bit 27 used by video playback if bit 31 is set */
     /* mask for the HDMI middleware(MDS) usage bit-mask */
     GRALLOC_USAGE_MDS_SESSION_ID_MASK   = 0x0F000000,
