@@ -62,6 +62,13 @@ typedef struct vibrator_module {
      * @return 0 if successful, -1 if error
      */
     int (*vibrator_off)();
+
+    /**
+     * Return minimum timeout for short vibrations
+     *
+     * @return timeout
+     */
+    long (*get_vibrator_min_timeout)();
 } vibrator_module_t;
 
 
