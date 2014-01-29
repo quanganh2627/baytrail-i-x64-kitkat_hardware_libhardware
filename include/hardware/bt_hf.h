@@ -72,6 +72,12 @@ typedef enum
     BTHF_WBS_CONFIG_OFF
 } bthf_wbs_config_t;
 
+typedef enum
+{
+    BTHF_SCO_RESOURCE_RELEASED = 0,
+    BTHF_SCO_RESOURCE_REQUESTED
+} bthf_sco_resource_requested_t;
+
 /** Callback for connection state change.
  *  state will have one of the values from BtHfConnectionState
  */
@@ -149,6 +155,10 @@ typedef void (* bthf_key_pressed_cmd_callback)();
  */
 typedef void (* bthf_wbs_config_callback)(bthf_wbs_config_t state);
 
+/** Callback for  SCOResourcesRequested
+*/
+typedef void (* bthf_sco_resource_callback)(bthf_sco_resource_requested_t state);
+
 /** BT-HF callback structure. */
 typedef struct {
     /** set to sizeof(BtHfCallbacks) */
@@ -170,6 +180,7 @@ typedef struct {
     bthf_unknown_at_cmd_callback    unknown_at_cmd_cb;
     bthf_key_pressed_cmd_callback   key_pressed_cmd_cb;
     bthf_wbs_config_callback        wbs_config_cb;
+    bthf_sco_resource_callback      sco_resource_cb;
 } bthf_callbacks_t;
 
 /** Network Status */
