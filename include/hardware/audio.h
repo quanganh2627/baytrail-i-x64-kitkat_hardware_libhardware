@@ -94,6 +94,11 @@ __BEGIN_DECLS
 /* BT Wide Band Speech */
 #define AUDIO_PARAMETER_KEY_BT_WBS "bt_headset_wbs"
 
+/* BT SCO Audio Resource requested */
+#define AUDIO_PARAMETER_KEY_SCO_RESOURCE "sco_resource_requested"
+#define AUDIO_PARAMETER_VALUE_SCO_RESOURCE_REQUESTED "true"
+#define AUDIO_PARAMETER_VALUE_SCO_RESOURCE_RELEASED "false"
+
 /* TTY mode selection */
 #define AUDIO_PARAMETER_KEY_TTY_MODE "tty_mode"
 #define AUDIO_PARAMETER_VALUE_TTY_OFF "tty_off"
