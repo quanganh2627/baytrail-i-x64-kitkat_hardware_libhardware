@@ -331,6 +331,11 @@ typedef void (*callback_thread_event)(bt_cb_thread_evt evt);
 /* Receive any HCI event from controller. Must be in DUT Mode for this callback to be received */
 typedef void (*dut_mode_recv_callback)(uint16_t opcode, uint8_t *buf, uint8_t len);
 
+#ifdef BDT_BTA_FM_DEBUG
+/* FM mitigation call back */
+typedef void (*bt_fm_mitigation_callback)(uint32_t status, uint32_t seq);
+#endif
+
 /* LE Test mode callbacks
 * This callback shall be invoked whenever the le_tx_test, le_rx_test or le_test_end is invoked
 * The num_packets is valid only for le_test_end command */
@@ -354,6 +359,9 @@ typedef struct {
     callback_thread_event thread_evt_cb;
     dut_mode_recv_callback dut_mode_recv_cb;
     le_test_mode_callback le_test_mode_cb;
+#ifdef BDT_BTA_FM_DEBUG
+    bt_fm_mitigation_callback bt_fm_mitigation_cb;
+#endif
 } bt_callbacks_t;
 
 /** NOTE: By default, no profiles are initialized at the time of init/enable.
@@ -467,6 +475,11 @@ typedef struct {
 
     /* enable or disable bluetooth HCI snoop log */
     int (*config_hci_snoop_log)(uint8_t enable);
+
+#ifdef BDT_BTA_FM_DEBUG
+    /* fm mitigation request */
+    int (*send_fm_mitigation_req)(uint8_t *chmask);
+#endif
 } bt_interface_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
