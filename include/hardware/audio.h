@@ -29,6 +29,8 @@
 #include <system/audio.h>
 #include <hardware/audio_effect.h>
 
+#include "audio_intel.h"
+
 __BEGIN_DECLS
 
 /**
@@ -116,22 +118,6 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
 #define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
 #define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID "bgm_session"
-
-/* Always Listening/VTSV */
-#define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_STATUS "vtsv_active"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ON "true"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_OFF "false"
-
-/* Always Listening Route/VTSV */
-#define AUDIO_PARAMETER_KEY_ALWAYS_LISTENING_ROUTE "vtsv_route"
-#define AUDIO_PARAMETER_KEY_LPAL_DEVICE "lpal_device"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ROUTE_ON "on"
-#define AUDIO_PARAMETER_VALUE_ALWAYS_LISTENING_ROUTE_OFF "off"
-
-/* Context awareness */
-#define AUDIO_PARAMETER_KEY_CONTEXT_AWARENESS_STATUS "context_awareness_status"
-#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_ON "on"
-#define AUDIO_PARAMETER_VALUE_CONTEXT_AWARENESS_OFF "off"
 
 /* No Non-linear Post processing */
 #define AUDIO_PARAMETER_KEY_BYPASS_NON_LINEAR_POSTPROCESSING_SETTING "BypassNonLinearPp"
