@@ -124,6 +124,9 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
 #define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION_ID "bgm_session"
 
+/*submix profile support*/
+#define AUDIO_PARAMETER_KEY_DIRECT_PROFILE_SUPPORTED "direct_profile_support"
+
 /* No Non-linear Post processing */
 #define AUDIO_PARAMETER_KEY_BYPASS_NON_LINEAR_POSTPROCESSING_SETTING "BypassNonLinearPp"
 #define AUDIO_PARAMETER_VALUE_BYPASS_NON_LINEAR_PP_ON "on"
