@@ -259,6 +259,18 @@ int mapFrameBufferLocked(struct private_module_t* module)
     if (finfo.smem_len <= 0)
         return -errno;
 
+    /* Force xres reported to upper layer (e.g. libEGL) to
+     * correspond to the actual line_length of the framebuffer.
+     * e.g. 1366x768 has xres 1368 but line_length 5504 (1376 * 4).
+     */
+    unsigned int line_length_width = finfo.line_length / (info.bits_per_pixel >> 3);
+    if (info.xres != line_length_width) {
+        ALOGI("line_length %d does not correspond to xres; "
+              "forcing xres to be %d.\n",
+              finfo.line_length, line_length_width);
+
+        info.xres = line_length_width;
+    }
 
     module->flags = flags;
     module->info = info;
