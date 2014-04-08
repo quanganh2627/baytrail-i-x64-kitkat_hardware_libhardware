@@ -475,6 +475,13 @@ typedef struct {
     int (*set_mws_transport_layer)(uint8_t transport_layer,
                                    uint32_t to_baud_rate,
                                    uint32_t from_baud_rate);
+    /** Set External Frame config (used for coexistence purposes) */
+    int (*set_external_frame_config)(uint16_t ext_frame_duration,
+                                     uint16_t ext_frame_sync_offset,
+                                     uint16_t ext_frame_sync_assert_jitter,
+                                     uint8_t ext_num_period,
+                                     uint16_t *ext_period_duration,
+                                     uint8_t *ext_period_type);
 } bt_interface_intel_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
