@@ -482,6 +482,8 @@ typedef struct {
                                      uint8_t ext_num_period,
                                      uint16_t *ext_period_duration,
                                      uint8_t *ext_period_type);
+    /** Set MWS signaling parameters (used for coexistence purposes) */
+    int (*set_mws_signaling) (uint16_t * parameters);
 } bt_interface_intel_t;
 
 /** TODO: Need to add APIs for Service Discovery, Service authorization and
