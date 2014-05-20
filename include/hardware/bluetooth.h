@@ -460,6 +460,15 @@ typedef struct {
     int (*config_hci_snoop_log)(uint8_t enable);
 } bt_interface_t;
 
+/** Represents the vendor specific Bluetooth DM interface. */
+typedef struct {
+    /** set to sizeof(bt_vendor_interface_t) */
+    size_t size;
+
+    /** Send vendor specific command */
+    int (*set_vendor_specific)(uint16_t opcode, uint8_t *parameters, uint8_t length);
+} bt_vs_interface_t;
+
 /** Represents the intel specific Bluetooth DM interface. */
 typedef struct {
     /** set to sizeof(bt_interface_intel_t) */
@@ -499,6 +508,7 @@ typedef struct {
     struct hw_device_t common;
     const bt_interface_t* (*get_bluetooth_interface)();
     const bt_interface_intel_t* (*get_bluetooth_interface_intel)();
+    const bt_vs_interface_t* (*get_bluetooth_vs_interface)();
 } bluetooth_device_t;
 
 typedef bluetooth_device_t bluetooth_module_t;
