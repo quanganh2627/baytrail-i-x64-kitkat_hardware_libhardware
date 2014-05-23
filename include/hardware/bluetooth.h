@@ -205,8 +205,13 @@ typedef enum {
      * Access mode - SET/GET.
      * Data type   - bt_remote_version_t.
      */
-
     BT_PROPERTY_REMOTE_VERSION_INFO,
+    /**
+     * Description - LE Appearance
+     * Access mode - Only GET.
+     * Data type   - uint32_t.
+     */
+    BT_PROPERTY_BLE_APPEARANCE,
 
     BT_PROPERTY_REMOTE_DEVICE_TIMESTAMP = 0xFF,
 } bt_property_type_t;
