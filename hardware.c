@@ -26,7 +26,7 @@
 
 #define LOG_TAG "HAL"
 #include <utils/Log.h>
-#include <libhalbindings/halclient.h>
+#include "libhalbindings/halclient.h"
 
 /** Base path of the hal modules */
 #if defined(__LP64__)
