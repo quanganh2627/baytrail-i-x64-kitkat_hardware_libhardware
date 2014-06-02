@@ -6,10 +6,15 @@ SUBDIR_MAKEFILES := $(call all-named-subdir-makefiles,modules tests)
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SHARED_LIBRARIES := libcutils liblog libhalclient
+LOCAL_SHARED_LIBRARIES := libcutils liblog
 
 LOCAL_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += hardware/intel/libhalclient/
+
+ifeq ($(HAL_AUTODETECT),true)
+LOCAL_SHARED_LIBRARIES += libhalclient
+LOCAL_CFLAGS += -DHAL_AUTODETECT
+endif
 
 LOCAL_CFLAGS  += -DQEMU_HARDWARE
 QEMU_HARDWARE := true

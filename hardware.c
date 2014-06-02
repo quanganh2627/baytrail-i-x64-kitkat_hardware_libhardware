@@ -173,6 +173,8 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
             goto found;
         }
     }
+#ifdef HAL_AUTODETECT
+
      /* Try to resolve the class through libhal first */
      hal_module = libhal_hal_module_get(name);
      if (!hal_module) {
@@ -193,6 +195,12 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
 
 	ALOGE("Could not find %s in /system\n", hal_module);
     }
+
+#else
+
+    hal_module = NULL;
+
+#endif /* HAL_AUTODETECT */
 
     /* Loop through the configuration variants looking for a module */
     for (i=0 ; i<HAL_VARIANT_KEYS_COUNT; i++) {
