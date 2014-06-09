@@ -46,9 +46,13 @@ endif
 ifeq ($(POWERHAL_BYT), true)
     LOCAL_CFLAGS += -DPOWERHAL_BYT
 endif
+ifeq ($(POWERHAL_CHT), true)
+    LOCAL_CFLAGS += -DPOWERHAL_CHT
+endif
 
 LOCAL_SHARED_LIBRARIES := liblog
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
+
 

@@ -214,6 +214,11 @@ static void intel_power_init(struct power_module *module)
     sysfs_write(TOUCHBOOST_SYSFS, "933000");
 #endif
 
+#if POWERHAL_CHT
+    sysfs_write(TOUCHBOOST_SYSFS, "1360000");
+#endif
+
+
 }
 
 static void intel_power_set_interactive(struct power_module *module, int on)
