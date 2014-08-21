@@ -248,6 +248,11 @@ struct audio_policy {
     /* check if offload is possible for given sample rate, bitrate, duration, ... */
     bool (*is_offload_supported)(const struct audio_policy *pol,
                                 const audio_offload_info_t *info);
+#ifdef DRD_FMR
+    // INTEL FMR begin:
+    int (*set_parameters)(struct audio_policy *pol, const char *keyValuePairs);
+    // INTEL FMR end
+#endif /* DRD_FMR */
 };
 
 /* audio hw module handle used by load_hw_module(), open_output_on_module()

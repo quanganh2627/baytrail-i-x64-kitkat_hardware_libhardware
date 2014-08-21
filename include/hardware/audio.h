@@ -156,6 +156,15 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_FMR_RX_VOLUME "fmr_rx_volume"
 // PEKALL FMR end
 
+// Intel FMR begin:
+#define AUDIO_PARAMETER_KEY_FMR "route-fm"
+#define AUDIO_PARAMETER_VALUE_FMR_HEADSET "headset"
+#define AUDIO_PARAMETER_VALUE_FMR_SPEAKER "speaker"
+#define AUDIO_PARAMETER_VALUE_FMR_DISABLE "disabled"
+
+#define AUDIO_PARAMETER_KEY_FMR_VOLUME "fm-volume"
+// Intel FMR end
+
 /**************************************/
 
 /* common audio stream configuration parameters
