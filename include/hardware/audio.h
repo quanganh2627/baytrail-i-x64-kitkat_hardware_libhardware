@@ -149,7 +149,6 @@ __BEGIN_DECLS
 /**
  * audio codec parameters
  */
-
 #define AUDIO_OFFLOAD_CODEC_PARAMS "music_offload_codec_param"
 #define AUDIO_OFFLOAD_CODEC_BIT_PER_SAMPLE "music_offload_bit_per_sample"
 #define AUDIO_OFFLOAD_CODEC_BIT_RATE "music_offload_bit_rate"
@@ -166,7 +165,6 @@ __BEGIN_DECLS
 /**
  * BT SCO link sampling rate selection
  */
-
 #define AUDIO_PARAMETER_KEY_BT_SCO_SR "bthf_rate"
 #define AUDIO_PARAMETER_VALUE_BT_SCO_SR_8KHZ "8khz"
 #define AUDIO_PARAMETER_VALUE_BT_SCO_SR_16KHZ "16khz"
@@ -177,6 +175,14 @@ __BEGIN_DECLS
 
 #define AUDIO_PARAMETER_FMR_RX_VOLUME "fmr_rx_volume"
 // PEKALL FMR end
+
+/**
+ * MIC Recording modes for meeting and default tuning profiles
+ */
+#define AUDIO_PARAMETER_KEY_MIC_REC_PROFILE "mic_rec_profile"
+#define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_DEFAULT "default"
+#define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_MEETING "meeting"
+
 
 // Intel FMR begin:
 #define AUDIO_PARAMETER_KEY_FMR "route-fm"
