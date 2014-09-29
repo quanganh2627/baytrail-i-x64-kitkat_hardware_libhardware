@@ -112,6 +112,11 @@ __BEGIN_DECLS
 /* Bluetooth SCO wideband */
 #define AUDIO_PARAMETER_KEY_BT_SCO_WB "bt_wbs"
 
+/* Remote BGM state */
+#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION "bgm_session"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_OUTPUT "bgm_output"
 
 /**
  *  audio stream parameters
