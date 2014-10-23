@@ -167,6 +167,10 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_DEFAULT "default"
 #define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_MEETING "meeting"
 
+/* FM Radio notification key / value pairs for audiofocus info */
+#define AUDIO_PARAMETER_KEY_FMR_NOTIFY "fmr_notify"
+#define AUDIO_PARAMETER_VALUES_FMR_NOTIFY_AUDIOFOCUS_LOSS_TRANSIENT "audiofocus_loss_transient"
+#define AUDIO_PARAMETER_VALUES_FMR_NOTIFY_AUDIOFOCUS_GAIN "audiofocus_gain"
 
 /**************************************/
 
