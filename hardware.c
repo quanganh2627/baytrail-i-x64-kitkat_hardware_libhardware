@@ -186,19 +186,21 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
         i = 0;
 
         snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH2, hal_module);
-        if (access(path, R_OK) == 0)
+        if (access(path, R_OK) == 0) {
+            free(hal_module);
             goto load_hal;
+        }
 
         snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH1, hal_module);
-        if (access(path, R_OK) == 0)
+        if (access(path, R_OK) == 0) {
+            free(hal_module);
             goto load_hal;
+        }
 
         ALOGE("Could not find %s in /system\n", hal_module);
+
+        free(hal_module);
     }
-
-#else
-
-    hal_module = NULL;
 
 #endif /* HAL_AUTODETECT */
 
@@ -218,9 +220,6 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
     }
 
 load_hal:
-
-    if (hal_module)
-        free(hal_module);
 
     status = -ENOENT;
     if (i < HAL_VARIANT_KEYS_COUNT+1) {
