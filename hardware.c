@@ -175,25 +175,25 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
     }
 #ifdef HAL_AUTODETECT
 
-     /* Try to resolve the class through libhal first */
-     hal_module = libhal_hal_module_get(name);
-     if (!hal_module) {
-	ALOGE("Could not find a HAL module for %s\n", class_id);
-     } else {
-	ALOGI("Got HAL server module %s (%s)\n",  hal_module, class_id);
+    /* Try to resolve the class through libhal first */
+    hal_module = libhal_hal_module_get(name);
+    if (!hal_module) {
+        ALOGE("Could not find a HAL module for %s\n", class_id);
+    } else {
+        ALOGI("Got HAL server module %s (%s)\n",  hal_module, class_id);
 
-	/* Initialize i so that the load_hal check passes */
-	i = 0;
+        /* Initialize i so that the load_hal check passes */
+        i = 0;
 
-	snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH2, hal_module);
-	if (access(path, R_OK) == 0)
-		goto load_hal;
+        snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH2, hal_module);
+        if (access(path, R_OK) == 0)
+            goto load_hal;
 
-	snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH1, hal_module);
-	if (access(path, R_OK) == 0)
-		goto load_hal;
+        snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH1, hal_module);
+        if (access(path, R_OK) == 0)
+            goto load_hal;
 
-	ALOGE("Could not find %s in /system\n", hal_module);
+        ALOGE("Could not find %s in /system\n", hal_module);
     }
 
 #else
