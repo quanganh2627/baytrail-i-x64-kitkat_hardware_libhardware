@@ -171,6 +171,26 @@ int mapFrameBufferLocked(struct private_module_t* module)
     info.yoffset = 0;
     info.activate = FB_ACTIVATE_NOW;
 
+    
+#if defined (VIRTUAL_FRAME_BUF)
+     /* hardcode */
+    info.xres = 320;
+    info.yres = 480;
+    info.bits_per_pixel = 32;
+    info.red.offset = 16;
+    info.red.length = 8;
+
+    info.green.offset = 8;
+    info.green.length = 8;
+
+    info.blue.offset = 0;
+    info.blue.length = 8;
+
+    info.transp.offset = 0;
+    info.transp.length = 8;
+
+    finfo.visual = FB_VISUAL_TRUECOLOR;
+#endif
     /*
      * Request NUM_BUFFERS screens (at lest 2 for page flipping)
      */
