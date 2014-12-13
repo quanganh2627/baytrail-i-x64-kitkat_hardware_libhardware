@@ -176,6 +176,16 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_FMR_RX_VOLUME "fmr_rx_volume"
 // PEKALL FMR end
 
+// Intel FMR begin:
+#define AUDIO_PARAMETER_KEY_FMR "route-fm"
+#define AUDIO_PARAMETER_VALUE_FMR_HEADSET "headset"
+#define AUDIO_PARAMETER_VALUE_FMR_SPEAKER "speaker"
+#define AUDIO_PARAMETER_VALUE_FMR_DISABLE "disabled"
+
+#define AUDIO_PARAMETER_KEY_FMR_VOLUME "fm-volume"
+// Intel FMR end
+
+
 /**
  * MIC Recording modes for meeting and default tuning profiles
  */
@@ -183,6 +193,10 @@ __BEGIN_DECLS
 #define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_DEFAULT "default"
 #define AUDIO_PARAMETER_VALUE_MIC_REC_PROFILE_MEETING "meeting"
 
+/* FM Radio notification key / value pairs for audiofocus info */
+#define AUDIO_PARAMETER_KEY_FMR_NOTIFY "fmr_notify"
+#define AUDIO_PARAMETER_VALUES_FMR_NOTIFY_AUDIOFOCUS_LOSS_TRANSIENT "audiofocus_loss_transient"
+#define AUDIO_PARAMETER_VALUES_FMR_NOTIFY_AUDIOFOCUS_GAIN "audiofocus_gain"
 
 // Intel FMR begin:
 #define AUDIO_PARAMETER_KEY_FMR "route-fm"
