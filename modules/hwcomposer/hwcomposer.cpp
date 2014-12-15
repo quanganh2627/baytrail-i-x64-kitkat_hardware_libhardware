@@ -126,23 +126,25 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
     if (!strcmp(name, HWC_HARDWARE_COMPOSER)) {
         struct hwc_context_t *dev;
         dev = (hwc_context_t*)malloc(sizeof(*dev));
+        if(dev)
+        {
+            /* initialize our state here */
+            memset(dev, 0, sizeof(*dev));
 
-        /* initialize our state here */
-        memset(dev, 0, sizeof(*dev));
+            /* initialize the procs */
+            dev->device.common.tag = HARDWARE_DEVICE_TAG;
+            dev->device.common.version = HWC_DEVICE_API_VERSION_1_0;
+            dev->device.common.module = const_cast<hw_module_t*>(module);
+            dev->device.common.close = hwc_device_close;
 
-        /* initialize the procs */
-        dev->device.common.tag = HARDWARE_DEVICE_TAG;
-        dev->device.common.version = HWC_DEVICE_API_VERSION_1_0;
-        dev->device.common.module = const_cast<hw_module_t*>(module);
-        dev->device.common.close = hwc_device_close;
+            dev->device.prepare = hwc_prepare;
+            dev->device.set = hwc_set;
+            dev->device.blank = hwc_blank;
+            dev->device.eventControl = hwc_eventControl;
 
-        dev->device.prepare = hwc_prepare;
-        dev->device.set = hwc_set;
-        dev->device.blank = hwc_blank;
-        dev->device.eventControl = hwc_eventControl;
-
-        *device = &dev->device.common;
-        status = 0;
+            *device = &dev->device.common;
+            status = 0;
+        }
     }
     return status;
 }
