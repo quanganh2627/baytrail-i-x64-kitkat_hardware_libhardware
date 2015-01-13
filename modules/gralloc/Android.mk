@@ -21,7 +21,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_SHARED_LIBRARIES := liblog libcutils
-
 LOCAL_SRC_FILES := 	\
 	gralloc.cpp 	\
 	framebuffer.cpp \
@@ -30,4 +29,7 @@ LOCAL_SRC_FILES := 	\
 LOCAL_MODULE := gralloc.default
 LOCAL_CFLAGS:= -DLOG_TAG=\"gralloc\"
 
+ifeq ($(USE_VIRTUAL_FRAME_BUF),true)
+LOCAL_CFLAGS  += -DVIRTUAL_FRAME_BUF
+endif
 include $(BUILD_SHARED_LIBRARY)
