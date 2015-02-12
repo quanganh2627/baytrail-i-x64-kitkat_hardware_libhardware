@@ -9,6 +9,12 @@ include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := libcutils liblog
 
 LOCAL_INCLUDES += $(LOCAL_PATH)
+LOCAL_C_INCLUDES += hardware/intel/libhalclient/
+
+ifeq ($(HAL_AUTODETECT),true)
+LOCAL_SHARED_LIBRARIES += libhalclient
+LOCAL_CFLAGS += -DHAL_AUTODETECT
+endif
 
 LOCAL_CFLAGS  += -DQEMU_HARDWARE
 QEMU_HARDWARE := true

@@ -26,6 +26,7 @@
 
 #define LOG_TAG "HAL"
 #include <utils/Log.h>
+#include "libhalbindings/halclient.h"
 
 /** Base path of the hal modules */
 #if defined(__LP64__)
@@ -146,10 +147,12 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
                            const struct hw_module_t **module)
 {
     int i;
+    int status;
     char prop[PATH_MAX];
     char path[PATH_MAX];
     char name[PATH_MAX];
     char prop_name[PATH_MAX];
+    char *hal_module;
 
     if (inst)
         snprintf(name, PATH_MAX, "%s.%s", class_id, inst);
@@ -170,6 +173,36 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
             goto found;
         }
     }
+#ifdef HAL_AUTODETECT
+
+    /* Try to resolve the class through libhal first */
+    hal_module = libhal_hal_module_get(name);
+    if (!hal_module) {
+        ALOGE("Could not find a HAL module for %s\n", class_id);
+    } else {
+        ALOGI("Got HAL server module %s (%s)\n",  hal_module, class_id);
+
+        /* Initialize i so that the load_hal check passes */
+        i = 0;
+
+        snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH2, hal_module);
+        if (access(path, R_OK) == 0) {
+            free(hal_module);
+            goto load_hal;
+        }
+
+        snprintf(path, sizeof(path), "%s/%s", HAL_LIBRARY_PATH1, hal_module);
+        if (access(path, R_OK) == 0) {
+            free(hal_module);
+            goto load_hal;
+        }
+
+        ALOGE("Could not find %s in /system\n", hal_module);
+
+        free(hal_module);
+    }
+
+#endif /* HAL_AUTODETECT */
 
     /* Loop through the configuration variants looking for a module */
     for (i=0 ; i<HAL_VARIANT_KEYS_COUNT; i++) {
@@ -186,7 +219,16 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
         goto found;
     }
 
-    return -ENOENT;
+load_hal:
+
+    status = -ENOENT;
+    if (i < HAL_VARIANT_KEYS_COUNT+1) {
+        /* load the module, if this fails, we're doomed, and we should not try
+         * to load a different variant. */
+        status = load(class_id, path, module);
+    }
+
+    return status;
 
 found:
     /* load the module, if this fails, we're doomed, and we should not try
