@@ -117,6 +117,12 @@ __BEGIN_DECLS
  * or no HW sync is available. */
 #define AUDIO_PARAMETER_HW_AV_SYNC "hw_av_sync"
 
+/* Remote BGM state */
+#define AUDIO_PARAMETER_KEY_REMOTE_BGM_STATE "bgm_state"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_AUDIO "bgm_audio"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_SESSION "bgm_session"
+#define AUDIO_PARAMETER_VALUE_REMOTE_BGM_OUTPUT "bgm_output"
+
 /**
  *  audio stream parameters
  */
